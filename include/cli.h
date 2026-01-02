@@ -1,1 +1,4 @@
-void parse(int argc, char **argv);
+#pragma once
+
+void parseArgs(int argc, char **argv);
+void doLookup(char *command);

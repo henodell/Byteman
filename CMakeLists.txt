@@ -10,7 +10,7 @@ add_library(commands STATIC ${COMMANDS_DIR}/get.c)
 target_include_directories(commands PUBLIC include)
 
 # cli
-add_library(cli STATIC ${CLI_DIR}/cli_parse.c)
+add_library(cli STATIC ${CLI_DIR}/cli_parse.c ${CLI_DIR}/command_dispatch.c)
 target_include_directories(cli PUBLIC include)
 
 # main exe
