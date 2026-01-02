@@ -3,6 +3,7 @@ project(Byteman VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(COMMANDS_DIR "src/commands")
+set(CLI_DIR "src/cli")
 
 # Commands lib
 add_library(commands STATIC ${COMMANDS_DIR}/get.c)
