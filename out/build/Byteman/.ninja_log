@@ -1,7 +1,0 @@
-# ninja log v6
-59	300	7890362959215078	CMakeFiles/Byteman.dir/src/main.c.obj	b37aa79008b4429c
-567	822	7890365256999266	C:/Users/sinet/Documents/CProjects/byteman-2/bin/Byteman.exe	bf66110e8506eac2
-58	338	7890365251904761	CMakeFiles/commands.dir/src/commands/get.c.obj	85b95c4aff894dcb
-340	567	7890365254724498	libcommands.a	c7742ce87899542
-7	227	7890372015643402	CMakeFiles/Byteman.dir/src/main.c.obj	b37aa79008b4429c
-229	512	7890372017868029	C:/Users/sinet/Documents/CProjects/byteman-2/bin/Byteman.exe	bf66110e8506eac2
