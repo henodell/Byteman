@@ -9,6 +9,11 @@ set(CLI_DIR "src/cli")
 add_library(commands STATIC ${COMMANDS_DIR}/get.c)
 target_include_directories(commands PUBLIC include)
 
+# cli
+add_library(cli STATIC ${CLI_DIR}/cli_parse.c)
+target_include_directories(cli PUBLIC include)
+
 # main exe
 add_executable(Byteman src/main.c)
 target_link_libraries(Byteman PUBLIC commands)
+target_link_libraries(Byteman PUBLIC cli)

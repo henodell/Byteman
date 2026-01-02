@@ -1,7 +1,8 @@
 #include <stdio.h>
-#include "commands.h"
+#include "cli.h"
+// #include "utils.h"
 
 int main(int argc, char **argv) {
     printf("%i\n", argc);
-    get();
+    parse(argc, argv);
 }
