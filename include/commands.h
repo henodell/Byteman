@@ -1,1 +1,1 @@
-void get();
+void ster();

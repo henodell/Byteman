@@ -4,6 +4,6 @@
 
 // Public API //
 
-AppState getAppstate() {
+AppState getAppState() {
     return LOCKED;
 }

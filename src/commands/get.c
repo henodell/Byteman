@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "commands.h"
 
-void get() {
+void ster() {
     printf("Get func");
 }

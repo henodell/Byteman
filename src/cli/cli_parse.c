@@ -12,13 +12,12 @@ void toLowerCase(char *str) {
     }
 }
 
-
 // Public API //
 
 void parseArgs(int argc, char **argv) {
     // Bounds check
     if (argc > 5 || argc < 2) {
-        fprintf(stderr, RED "byteman parse: error: expected 2-5 args got %d\n" TRY_PASSMAN_HELP RESET, argc);
+        fprintf(stderr, RED "byteman parse: error: expected 2-5 args got %d\n" TRY_BYTEMAN_HELP RESET, argc);
     }
     
     char *command = argv[1];

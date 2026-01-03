@@ -5,7 +5,7 @@
 #define RESET "\033[0m"
 
 // Errors
-#define TRY_PASSMAN_HELP "try byteman help for more information\n"
+#define TRY_BYTEMAN_HELP "try byteman help for more information\n"
 
 // Types
 typedef enum {
@@ -13,4 +13,4 @@ typedef enum {
     OPEN
 } AppState;
 
-AppState getAppstate();
+AppState getAppState();
