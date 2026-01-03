@@ -11,7 +11,7 @@ typedef struct {
 } FuncEntry;
 
 FuncEntry lockedFunctions[] = {
-    {"login", ster},
+    {"login", login},
     {"signup", ster},
     {"exit", ster}
 };

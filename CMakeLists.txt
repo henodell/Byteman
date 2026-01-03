@@ -6,13 +6,15 @@ set(COMMANDS_DIR "src/commands")
 set(CLI_DIR "src/cli")
 
 # Commands lib
-add_library(commands STATIC ${COMMANDS_DIR}/get.c)
+add_library(commands STATIC ${COMMANDS_DIR}/get.c ${COMMANDS_DIR}/login.c)
 target_include_directories(commands PUBLIC include)
 
-# cli
+# cli lib
+find_package(OpenSSL REQUIRED)
 add_library(cli STATIC ${CLI_DIR}/cli_parse.c ${CLI_DIR}/command_dispatch.c)
 target_include_directories(cli PUBLIC include)
 target_link_libraries(cli PUBLIC commands)
+target_link_libraries(cli PRIVATE OpenSSL::Crypto)
 
 # main exe
 add_executable(Byteman src/main.c src/utils.c)

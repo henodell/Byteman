@@ -2,6 +2,7 @@
 #include <string.h>
 #include <errno.h>
 #include "utils.h"
+
 // Private Functions //
 
 int fileExists(const char *fileName) {
