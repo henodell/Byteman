@@ -1,4 +1,4 @@
 #pragma once
 
-void parseArgs(int argc, char **argv);
-void doLookup(char *command);
+void parse_cli_args(int argc, char **argv);
+void do_lookup(char *comm);

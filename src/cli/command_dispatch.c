@@ -5,12 +5,12 @@
 #include "cli.h"
 #include "utils.h"
 
-typedef struct {
+struct func_entry {
     const char name[8];
     void (*func)(void);
-} FuncEntry;
+};
 
-FuncEntry lockedFunctions[] = {
+struct func_entry locked_functions[] = {
     {"login", login},
     {"signup", ster},
     {"exit", ster}
@@ -18,9 +18,9 @@ FuncEntry lockedFunctions[] = {
 
 // Private Functions //
 
-void loopTable(FuncEntry arr[], int size, char *command) {
+void loop_struct_tbl(struct func_entry arr[], int size, char *comm) {
     for (int i = 0; i < size; i++) {
-        if (strcmp(command, arr[i].name) == 0) {
+        if (strcmp(comm, arr[i].name) == 0) {
             arr[i].func();
             return;
         }
@@ -29,13 +29,13 @@ void loopTable(FuncEntry arr[], int size, char *command) {
 }
 
 // Public API //
-const int NUM_LOCKED_FUNCTIONS = sizeof(lockedFunctions) / sizeof(lockedFunctions[0]);
+const int NUM_LOCKED_FUNCTIONS = sizeof(locked_functions) / sizeof(locked_functions[0]);
 
-void doLookup(char *command) {
-    AppState curState = getAppState();
+void do_lookup(char *comm) {
+    enum app_state cur_state = get_app_state();
 
-    if (curState == LOCKED) {
-        loopTable(lockedFunctions, NUM_LOCKED_FUNCTIONS, command);
+    if (cur_state == LOCKED) {
+        loop_struct_tbl(locked_functions, NUM_LOCKED_FUNCTIONS, comm);
     }
         // loopTable()
     // }

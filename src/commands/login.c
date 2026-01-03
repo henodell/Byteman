@@ -7,18 +7,18 @@
 
 // Private Functions //
 
-void alphaNumericCheck(char *str, int *checkBool) {
-    *checkBool = 1; // assume valid
+void alphanumeric_check(char *str, int *check_bool) {
+    *check_bool = 1; // assume valid
 
     for (int i = 0; str[i] != 0; i++) {
         if (!isalnum(str[i])) {
-            *checkBool = 0;
+            *check_bool = 0;
             break;
         }
     }
 }
 
-void trimSpaces(char *str) {
+void trim_sapces(char *str) {
     // loop from end to beginning until reaching normal char
     for (int i = strlen(str) - 1; i >= 0; i--) {
         if (isalpha(str[i])) {
@@ -44,7 +44,7 @@ void trimSpaces(char *str) {
 
 void login() {
     char username[20 + 1];
-    int passCheck = 1;
+    int pass_check = 1;
 
     do {
         printf("Username (max length: 20, alphanumeric): ");
@@ -57,8 +57,8 @@ void login() {
         username[strcspn(username, "\n")] = 0;
 
         // trimSpaces(username);
-        alphaNumericCheck(username, &passCheck);
-    } while (passCheck == 0);
+        alphanumeric_check(username, &pass_check);
+    } while (pass_check == 0);
 
     printf("Username is %s", username);
 }

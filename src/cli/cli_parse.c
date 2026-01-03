@@ -6,7 +6,7 @@
 
 // Private Functions //
 
-void toLowerCase(char *str) {
+void to_lower_case(char *str) {
     for (int i = 0; i < strlen(str); i++) {
         str[i] = tolower(str[i]);
     }
@@ -14,14 +14,14 @@ void toLowerCase(char *str) {
 
 // Public API //
 
-void parseArgs(int argc, char **argv) {
+void parse_cli_args(int argc, char **argv) {
     // Bounds check
     if (argc > 5 || argc < 2) {
         fprintf(stderr, RED "byteman parse: error: expected 2-5 args got %d\n" TRY_BYTEMAN_HELP RESET, argc);
     }
     
     char *command = argv[1];
-    toLowerCase(command);
+    to_lower_case(command);
     
-    doLookup(command);
+    do_lookup(command);
 }

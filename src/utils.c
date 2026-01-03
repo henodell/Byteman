@@ -5,8 +5,8 @@
 
 // Private Functions //
 
-int fileExists(const char *fileName) {
-    FILE *file = fopen(fileName, "r");
+int file_exists(const char *file_name) {
+    FILE *file = fopen(file_name, "r");
 
     if (file != NULL) {
         return 1;
@@ -17,14 +17,11 @@ int fileExists(const char *fileName) {
 
 // Public API //
 
-AppState getAppState() {
-    if (!fileExists(".session")) {
+enum app_state get_app_state() {
+    if (!file_exists(".session")) {
         // fprintf(stderr ,RED "byteman file: error: %s\n" RESET, strerror(errno));
         return LOCKED;
     }
 
     // read contents of .session
-    
-
-
 }
