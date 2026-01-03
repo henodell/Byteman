@@ -11,8 +11,9 @@ typedef struct {
 } FuncEntry;
 
 FuncEntry lockedFunctions[] = {
-    {"get", ster},
-    {"list", ster}
+    {"login", ster},
+    {"signup", ster},
+    {"exit", ster}
 };
 
 // Private Functions //
@@ -24,7 +25,7 @@ void loopTable(FuncEntry arr[], int size, char *command) {
             return;
         }
     }
-    fprintf(stderr, RED "byteman lookup: error: couldn't find command in lookup\n" TRY_BYTEMAN_HELP RESET, command);
+    fprintf(stderr, RED "byteman lookup: error: couldn't find command in lookup\n" TRY_BYTEMAN_HELP RESET);
 }
 
 // Public API //
@@ -36,6 +37,6 @@ void doLookup(char *command) {
     if (curState == LOCKED) {
         loopTable(lockedFunctions, NUM_LOCKED_FUNCTIONS, command);
     }
-        // loopTable();
+        // loopTable()
     // }
 }
