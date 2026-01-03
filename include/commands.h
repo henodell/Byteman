@@ -1,4 +1,4 @@
 #pragma once
 
 void ster();
-void login();
+void Login();

@@ -7,58 +7,58 @@
 
 // Private Functions //
 
-void alphanumeric_check(char *str, int *check_bool) {
+void AlphaNumericCheck(char *s, int *check_bool) {
     *check_bool = 1; // assume valid
 
-    for (int i = 0; str[i] != 0; i++) {
-        if (!isalnum(str[i])) {
+    for (int i = 0; s[i] != 0; i++) {
+        if (!isalnum(s[i])) {
             *check_bool = 0;
             break;
         }
     }
 }
 
-void trim_sapces(char *str) {
+void TrimSpaces(char *s) {
     // loop from end to beginning until reaching normal char
-    for (int i = strlen(str) - 1; i >= 0; i--) {
-        if (isalpha(str[i])) {
+    for (int i = strlen(s) - 1; i >= 0; i--) {
+        if (isalpha(s[i])) {
             break;
         } else {
-            str[i] = 0;
+            s[i] = 0;
         };
     }
 
     // loop from beginning to end until normal char
-    for (int i = 0; i > strlen(str); i++) {
-        if (isalpha(str[i])) {
+    for (int i = 0; i > strlen(s); i++) {
+        if (isalpha(s[i])) {
             break;
         } else {
-            str[i] = 0;
+            s[i] = 0;
         }
     }
 
-    printf("%s\n", str);
+    printf("%s\n", s);
 }
 
 // Public API //
 
-void login() {
-    char username[20 + 1];
+void Login() {
+    char user_name[20 + 1];
     int pass_check = 1;
 
     do {
         printf("Username (max length: 20, alphanumeric): ");
-        if (fgets(username, sizeof(username), stdin) == NULL) {
+        if (fgets(user_name, sizeof(user_name), stdin) == NULL) {
             fprintf(stderr, RED "byteman input: error: %s\n" TRY_BYTEMAN_HELP RESET, strerror(errno));
             break;
         }
 
         // remove newline for alpha check to not break
-        username[strcspn(username, "\n")] = 0;
+        user_name[strcspn(user_name, "\n")] = 0;
 
         // trimSpaces(username);
-        alphanumeric_check(username, &pass_check);
+        AlphaNumericCheck(user_name, &pass_check);
     } while (pass_check == 0);
 
-    printf("Username is %s", username);
+    printf("Username is %s", user_name);
 }

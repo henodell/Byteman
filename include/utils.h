@@ -8,9 +8,9 @@
 #define TRY_BYTEMAN_HELP "try byteman help for more information\n"
 
 // Types
-enum app_state {
+enum AppState {
     LOCKED,
     OPEN
 };
 
-enum app_state get_app_state();
+enum AppState GetAppState();
