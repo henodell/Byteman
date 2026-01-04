@@ -18,27 +18,27 @@ void AlphaNumericCheck(char *s, int *check_bool) {
     }
 }
 
-void TrimSpaces(char *s) {
-    // loop from end to beginning until reaching normal char
-    for (int i = strlen(s) - 1; i >= 0; i--) {
-        if (isalpha(s[i])) {
-            break;
-        } else {
-            s[i] = 0;
-        };
-    }
+// void TrimSpaces(char *s) {
+//     // loop from end to beginning until reaching normal char
+//     for (int i = strlen(s) - 1; i >= 0; i--) {
+//         if (isalpha(s[i])) {
+//             break;
+//         } else {
+//             s[i] = 0;
+//         };
+//     }
 
-    // loop from beginning to end until normal char
-    for (int i = 0; i > strlen(s); i++) {
-        if (isalpha(s[i])) {
-            break;
-        } else {
-            s[i] = 0;
-        }
-    }
+//     // loop from beginning to end until normal char
+//     for (int i = 0; i > strlen(s); i++) {
+//         if (isalpha(s[i])) {
+//             break;
+//         } else {
+//             s[i] = 0;
+//         }
+//     }
 
-    printf("%s\n", s);
-}
+//     printf("%s\n", s);
+// }
 
 // Public API //
 

@@ -12,7 +12,7 @@ struct FuncEntry {
 
 struct FuncEntry locked_functions[] = {
     {"login", Login},
-    {"signup", ster},
+    {"signup", Signup},
     {"exit", ster}
 };
 

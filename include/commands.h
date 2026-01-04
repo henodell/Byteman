@@ -2,3 +2,4 @@
 
 void ster();
 void Login();
+void Signup();

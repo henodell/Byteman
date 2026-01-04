@@ -6,7 +6,7 @@ set(COMMANDS_DIR "src/commands")
 set(CLI_DIR "src/cli")
 
 # Commands lib
-add_library(commands STATIC ${COMMANDS_DIR}/get.c ${COMMANDS_DIR}/login.c)
+add_library(commands STATIC ${COMMANDS_DIR}/get.c ${COMMANDS_DIR}/login.c ${COMMANDS_DIR}/signup.c)
 target_include_directories(commands PUBLIC include)
 
 # cli lib
