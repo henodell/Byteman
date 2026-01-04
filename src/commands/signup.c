@@ -19,11 +19,30 @@ int AlnumCheck(char *str) {
 }
 
 int VarietyCheck(char *str) {
-
+// TODO
 }
 
-int ConfirmCheck(char *str) {
+int ConfirmCheck(char *str, char *confirm) {
+    if (strcmp(str, confirm) == 0) {
+        return 1;
+    }
 
+    return 0;
+}
+
+void GetInputConfirm(char *msg, char *buf, int buffer_size, char *original) {
+    while (1) {
+        printf(msg);
+        if (fgets(buf, buffer_size, stdin) == NULL) {
+            break;
+        }
+
+        buf[strcspn(buf, "\n")] = 0;
+
+        if (ConfirmCheck(buf, original) == 1) {
+            break;
+        }
+    }
 }
 
 void GetInput(char *msg, char *buf, int buffer_size, InputCondition cond) {
@@ -45,15 +64,35 @@ void GetInput(char *msg, char *buf, int buffer_size, InputCondition cond) {
 // Public API //
 
 void Signup() {
-    char user_msg[] = "Enter a username(20 chars, alphanumeric): ";
-    char user_name[20+1];
-    GetInput(user_msg, user_name, 20 + 1, AlnumCheck);
+    char user_name[20 + 1];
+    GetInput("Enter a username(20 chars, alphanumeric): ", 
+                    user_name, 
+                    20 + 1,
+                    AlnumCheck);
 
-    char password_msg[] = "Enter a master password(max 64 chars): ";
+    // so .vault file doesnt get overwritten
+    char file_name[28];
+    snprintf(file_name, sizeof(file_name), "%s.vault", user_name);
+    if (FileExists(file_name)) {
+        fprintf(stderr, RED "byteman file: error: file already exists, use a different username.\n" TRY_BYTEMAN_HELP RESET);
+        return;
+    }
+    
     char password[64 + 1];
-    GetInput(password_msg, password, 64 + 1, VarietyCheck);
+    GetInput("Enter a master password(max 64 chars): ", 
+                    password, 
+                    64 + 1,
+                    AlnumCheck); // TODO: replace alnumcheck with varietycheck
 
-    char pass_confirm_msg[] = "Confirm your master password: ";
     char pass_confirm[64 + 1];
-    GetInput(password_msg, password, 64 + 1, ConfirmCheck);
+    GetInputConfirm("Confirm your master password: ", 
+                    pass_confirm, 
+                    64 + 1, 
+                    password);
+
+    printf(GREEN "Successfully signed up!\n" RESET);
+    FILE *vault = fopen(file_name, "a");
+    fputs("Word is cool", vault); // TEST
+
+    // printf("%s\n", file_name);
 }
