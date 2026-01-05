@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15...4.1)
+cmake_minimum_required(VERSION 3.10...4.1)
 project(Byteman VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
@@ -10,11 +10,9 @@ add_library(commands STATIC ${COMMANDS_DIR}/get.c ${COMMANDS_DIR}/login.c ${COMM
 target_include_directories(commands PUBLIC include)
 
 # cli lib
-find_package(OpenSSL REQUIRED)
 add_library(cli STATIC ${CLI_DIR}/cli_parse.c ${CLI_DIR}/command_dispatch.c)
 target_include_directories(cli PUBLIC include)
 target_link_libraries(cli PUBLIC commands)
-target_link_libraries(cli PRIVATE OpenSSL::Crypto)
 
 # main exe
 add_executable(Byteman src/main.c src/utils.c)

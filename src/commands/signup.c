@@ -9,7 +9,7 @@ enum PassError {
     OK = 1,
     TOO_SHORT,
     HAS_SPACE,
-    NOT_COMPLEX,
+    WEAK
 };
 
 // Private Functions //
@@ -70,7 +70,7 @@ enum PassError PasswordCheck(char *pass) {
         return OK;
     }
 
-    return NOT_COMPLEX;
+    return WEAK;
 }
 
 int ConfirmCheck(char *buf, char *original) {
@@ -112,7 +112,7 @@ void GetPassword(char *buf, const int BUFFER_SIZE) {
             case TOO_SHORT:
                 printf(RED "Use atleast 8 chars.\n" RESET);
                 break;
-            case NOT_COMPLEX:
+            case WEAK:
                 printf(RED "Your password must contain a digit, symbol and a letter.\n" RESET);
                 break;
         }
@@ -162,6 +162,4 @@ void Signup() {
         fprintf(stderr, RED "byteman file: error: %s\n", TRY_BYTEMAN_HELP  RESET, errno);
         exit(1);
     }
-
-    fputs("Word is cool", vault);
 }
