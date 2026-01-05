@@ -30,7 +30,7 @@ int ReadInput(char *buf, const int BUFFER_SIZE) {
 
 int UsernameCheck(char *user) {
     for (int i = 0; user[i]; i++) {
-        if (!isalpha(i)) {
+        if (!isalpha(user[i])) {
             return 0;
             break;
         }
@@ -48,7 +48,7 @@ enum PassError PasswordCheck(char *pass) {
     int letter_check = 0;
     int symbol_check = 0;
     // assume no spaces
-    int space_check = 1;
+    int space_check = 0;
     
     for (int i = 0; i < pass[i]; i++) {
         if (isdigit(pass[i])) {
@@ -66,11 +66,19 @@ enum PassError PasswordCheck(char *pass) {
         return HAS_SPACE;
     }
 
-    if (digit_check && letter_check && space_check) {
+    if (digit_check && letter_check && symbol_check) {
         return OK;
     }
 
     return NOT_COMPLEX;
+}
+
+int ConfirmCheck(char *buf, char *original) {
+    if (strcmp(buf, original) == 0) {
+        return 1;
+    }
+
+    return 0;
 }
 
 // Input //
@@ -79,7 +87,7 @@ void GetUsername(char *buf, const int BUFFER_SIZE) {
     while (1) {
         printf("Enter a username(20 chars, alphanumeric): ");
         if (ReadInput(buf, BUFFER_SIZE) == 0) {
-            break;
+            exit(1);
         }
 
         if (UsernameCheck(buf) == 1) {
@@ -92,7 +100,7 @@ void GetPassword(char *buf, const int BUFFER_SIZE) {
     while (1) {
         printf("Enter a password(max 64 chars, min 8 chars): ");
         if (ReadInput(buf, BUFFER_SIZE) == 0) {
-            break;
+            exit(1);
         }
 
         enum PassError err = PasswordCheck(buf);
@@ -115,8 +123,17 @@ void GetPassword(char *buf, const int BUFFER_SIZE) {
     }
 }
 
-void GetPasswordConfirm(char *buf, const int BUFFER_SIZE) {
-    while (1) {}
+void GetPasswordConfirm(char *buf, const int BUFFER_SIZE, char *original) {
+    while (1) {
+        printf("Confirm your master password: ");
+        if (ReadInput(buf, BUFFER_SIZE) == 0) {
+            exit(1);
+        }
+
+        if (ConfirmCheck(buf, original) == 1) {
+            break;
+        }
+    }
 }
 
 
@@ -131,17 +148,20 @@ void Signup() {
 
     GetUsername(user_name, sizeof(user_name));
     GetPassword(password, sizeof(password));
-
+    GetPasswordConfirm(pass_confirm, sizeof(pass_confirm), password);
 
     printf(GREEN "Successfully signed up!\n" RESET);
-    // FILE *vault = fopen(file_name, "a");
 
-    // if (!vault) {
-    //     fprintf(stderr, RED "byteman file: error: %s\n", TRY_BYTEMAN_HELP  RESET, errno);
-    //     exit(1);
-    // }
+    // create a file with .vault extension to store pass
+    char file_name[sizeof(user_name) + 7];
+    snprintf(file_name, sizeof(file_name), strcat(user_name, ".vault"));
 
-    // fputs("Word is cool", vault); // TEST
+    FILE *vault = fopen(file_name, "a");
 
-    // printf("%s\n", file_name);
+    if (!vault) {
+        fprintf(stderr, RED "byteman file: error: %s\n", TRY_BYTEMAN_HELP  RESET, errno);
+        exit(1);
+    }
+
+    fputs("Word is cool", vault);
 }
