@@ -89,6 +89,14 @@ void GetUsername(char *buf, const int BUFFER_SIZE) {
         if (ReadInput(buf, BUFFER_SIZE) == 0) {
             exit(1);
         }
+        char f_name[sizeof(buf) + 6 + 1];
+        strcpy(f_name, buf);
+        strcat(f_name, ".vault");
+
+        if (FileExists(f_name) == 1) {
+            printf(RED "Use a different username.\n" RESET);
+            continue;
+        }
 
         if (UsernameCheck(buf) == 1) {
             break;
