@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <openssl/evp.h>
+#include <assert.h>
 #include "commands.h"
 #include "utils.h"
 
@@ -170,4 +172,5 @@ void Signup() {
         fprintf(stderr, RED "byteman file: error: %s\n", TRY_BYTEMAN_HELP  RESET, errno);
         exit(1);
     }
+    // fprintf(vault, "user-%s %s", user_name, hash);
 }
