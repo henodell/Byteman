@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 #include <assert.h>
 #include "commands.h"
 #include "utils.h"
@@ -29,7 +30,7 @@ int ReadInput(char *buf, const int BUFFER_SIZE) {
 }
 
 // Hashing //
-void DigestMessage(const unsigned char *msg, size_t len, unsigned char **digest, unsigned int *digest_len) {
+void DigestMessage(const unsigned char *msg, size_t len, unsigned char **digest, unsigned int *digest_len, char *salt, size_t salt_len) {
     EVP_MD_CTX *mdctx;
 
     if ((mdctx = EVP_MD_CTX_new()) == NULL) {
@@ -37,6 +38,11 @@ void DigestMessage(const unsigned char *msg, size_t len, unsigned char **digest,
     }
 
     if (EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL) != 1) {
+        printf("Error!\n");
+    }
+
+    // salt
+    if (EVP_DigestUpdate(mdctx, salt, salt_len) != 1) {
         printf("Error!\n");
     }
 
@@ -141,6 +147,7 @@ void GetPassword(char *buf, const int BUFFER_SIZE) {
         }
 
         enum PassError err = PasswordCheck(buf);
+        printf("%i\n", err);
 
         switch (err) {
             case HAS_SPACE:
@@ -203,13 +210,19 @@ void Signup() {
 
     unsigned char *md_value = NULL;
     unsigned int md_len = 0;
-    DigestMessage((unsigned char *) password, strlen(password), &md_value, &md_len);
+    char salt[16];
+    RAND_bytes(salt, sizeof(salt));
+    DigestMessage((unsigned char *) password, strlen(password), &md_value, &md_len, salt, sizeof(salt));
 
-    fprintf(vault, "user-%s ", user_name);
-    
+    fprintf(vault, "user %s\n", user_name);    
     for (unsigned int i = 0; i < md_len; i++) {
         fprintf(vault,"%02x", md_value[i]);
     }
-    // fprintf(vault, "user-%s %s", user_name, hash);
+    fprintf(vault, "\n");
+
+    // salt
+    for (unsigned int i = 0; i < sizeof(salt); i++) {
+        fprintf(vault, "%02x", salt[i]);
+    }
 }
 // watgivLIFEm3an_CONNOR
