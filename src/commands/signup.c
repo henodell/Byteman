@@ -28,6 +28,33 @@ int ReadInput(char *buf, const int BUFFER_SIZE) {
     return 1;
 }
 
+// Hashing //
+void DigestMessage(const unsigned char *msg, size_t len, unsigned char **digest, unsigned int *digest_len) {
+    EVP_MD_CTX *mdctx;
+
+    if ((mdctx = EVP_MD_CTX_new()) == NULL) {
+        printf("Error!\n");
+    }
+
+    if (EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL) != 1) {
+        printf("Error!\n");
+    }
+
+    if (EVP_DigestUpdate(mdctx, msg, len) != 1) {
+        printf("Error!\n");
+    }
+
+    if ((*digest = (unsigned char *)OPENSSL_malloc(EVP_MD_size(EVP_sha256()))) == NULL) {
+        printf("Error!\n");
+    }
+
+    if (EVP_DigestFinal_ex(mdctx, *digest, digest_len) != 1) {
+        printf("Error!|n");
+    }
+
+    EVP_MD_CTX_free(mdctx);
+}
+
 // Checks //
 
 int UsernameCheck(char *user) {
@@ -52,7 +79,7 @@ enum PassError PasswordCheck(char *pass) {
     // assume no spaces
     int space_check = 0;
     
-    for (int i = 0; i < pass[i]; i++) {
+    for (int i = 0; i < strlen(pass); i++) {
         if (isdigit(pass[i])) {
             digit_check = 1;
         } else if (isalpha(pass[i])) {
@@ -164,7 +191,8 @@ void Signup() {
 
     // create a file with .vault extension to store pass
     char file_name[sizeof(user_name) + 7];
-    snprintf(file_name, sizeof(file_name), strcat(user_name, ".vault"));
+    strcpy(file_name, user_name);
+    snprintf(file_name, sizeof(file_name), strcat(file_name, ".vault"));
 
     FILE *vault = fopen(file_name, "a");
 
@@ -172,5 +200,16 @@ void Signup() {
         fprintf(stderr, RED "byteman file: error: %s\n", TRY_BYTEMAN_HELP  RESET, errno);
         exit(1);
     }
+
+    unsigned char *md_value = NULL;
+    unsigned int md_len = 0;
+    DigestMessage((unsigned char *) password, strlen(password), &md_value, &md_len);
+
+    fprintf(vault, "user-%s ", user_name);
+    
+    for (unsigned int i = 0; i < md_len; i++) {
+        fprintf(vault,"%02x", md_value[i]);
+    }
     // fprintf(vault, "user-%s %s", user_name, hash);
 }
+// watgivLIFEm3an_CONNOR
