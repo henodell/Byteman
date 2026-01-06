@@ -17,50 +17,6 @@ enum PassError {
 
 // Private Functions //
 
-// Helpers //
-
-int ReadInput(char *buf, const int BUFFER_SIZE) {
-    if (fgets(buf, BUFFER_SIZE, stdin) == NULL) {
-        return 0;
-    }
-
-    buf[strcspn(buf, "\n")] = 0;
-
-    return 1;
-}
-
-// Hashing //
-void DigestMessage(const unsigned char *msg, size_t len, unsigned char **digest, unsigned int *digest_len, char *salt, size_t salt_len) {
-    EVP_MD_CTX *mdctx;
-
-    if ((mdctx = EVP_MD_CTX_new()) == NULL) {
-        printf("Error!\n");
-    }
-
-    if (EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL) != 1) {
-        printf("Error!\n");
-    }
-
-    // salt
-    if (EVP_DigestUpdate(mdctx, salt, salt_len) != 1) {
-        printf("Error!\n");
-    }
-
-    if (EVP_DigestUpdate(mdctx, msg, len) != 1) {
-        printf("Error!\n");
-    }
-
-    if ((*digest = (unsigned char *)OPENSSL_malloc(EVP_MD_size(EVP_sha256()))) == NULL) {
-        printf("Error!\n");
-    }
-
-    if (EVP_DigestFinal_ex(mdctx, *digest, digest_len) != 1) {
-        printf("Error!|n");
-    }
-
-    EVP_MD_CTX_free(mdctx);
-}
-
 // Checks //
 
 int UsernameCheck(char *user) {
@@ -147,7 +103,6 @@ void GetPassword(char *buf, const int BUFFER_SIZE) {
         }
 
         enum PassError err = PasswordCheck(buf);
-        printf("%i\n", err);
 
         switch (err) {
             case HAS_SPACE:
@@ -214,13 +169,16 @@ void Signup() {
     RAND_bytes(salt, sizeof(salt));
     DigestMessage((unsigned char *) password, strlen(password), &md_value, &md_len, salt, sizeof(salt));
 
-    fprintf(vault, "user %s\n", user_name);    
+    /*
+    <user_name>:<hash>:<salt>
+    */
+    fprintf(vault, "%s", user_name);    
+    fprintf(vault, ":");
     for (unsigned int i = 0; i < md_len; i++) {
         fprintf(vault,"%02x", md_value[i]);
     }
-    fprintf(vault, "\n");
+    fprintf(vault, ":");
 
-    // salt
     for (unsigned int i = 0; i < sizeof(salt); i++) {
         fprintf(vault, "%02x", salt[i]);
     }

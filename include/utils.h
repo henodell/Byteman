@@ -16,3 +16,5 @@ enum AppState {
 
 enum AppState GetAppState();
 int FileExists(const char *name);
+int ReadInput(char *buf, const int BUFFER_SIZE);
+void DigestMessage(const unsigned char *msg, size_t len, unsigned char **digest, unsigned int *digest_len, char *salt, size_t salt_len);

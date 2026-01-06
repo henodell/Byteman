@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
+#include <openssl/evp.h>
 #include <string.h>
 #include <errno.h>
 #include "utils.h"
@@ -7,58 +9,47 @@
 
 // Private Functions //
 
-void AlphaNumericCheck(char *s, int *check_bool) {
-    *check_bool = 1; // assume valid
+void LoginUsername(char *buf, char *file_name, const int BUFFER_SIZE) {
+    while (1) {
+        printf("Username: ");
 
-    for (int i = 0; s[i] != 0; i++) {
-        if (!isalnum(s[i])) {
-            *check_bool = 0;
+        if (ReadInput(buf, BUFFER_SIZE) != 1) {
+            fprintf(stderr, RED "byteman input: error: Input error or EOF.\n" TRY_BYTEMAN_HELP RESET);
+            exit(1);
+        }
+
+        strcpy(file_name, buf);
+        strcat(file_name, ".vault");
+        
+        if (FileExists(file_name)) {
             break;
         }
     }
 }
 
-// void TrimSpaces(char *s) {
-//     // loop from end to beginning until reaching normal char
-//     for (int i = strlen(s) - 1; i >= 0; i--) {
-//         if (isalpha(s[i])) {
-//             break;
-//         } else {
-//             s[i] = 0;
-//         };
-//     }
+void LoginPassword(char *buf, char *file_name, const int BUFFER_SIZE) {
+    FILE *vault = fopen(file_name, "r");
+    if (!vault) {
+        perror("File opening failed");
+        exit(1);
+    }
 
-//     // loop from beginning to end until normal char
-//     for (int i = 0; i > strlen(s); i++) {
-//         if (isalpha(s[i])) {
-//             break;
-//         } else {
-//             s[i] = 0;
-//         }
-//     }
+    
 
-//     printf("%s\n", s);
-// }
+    
+
+
+}
+
+// void LoginPassword(char *buf, const int BUFFER_SIZE)
 
 // Public API //
 
 void Login() {
     char user_name[20 + 1];
-    int pass_check = 1;
-
-    do {
-        printf("Username (max length: 20, alphanumeric): ");
-        if (fgets(user_name, sizeof(user_name), stdin) == NULL) {
-            fprintf(stderr, RED "byteman input: error: %s\n" TRY_BYTEMAN_HELP RESET, strerror(errno));
-            break;
-        }
-
-        // remove newline for alpha check to not break
-        user_name[strcspn(user_name, "\n")] = 0;
-
-        // trimSpaces(username);
-        AlphaNumericCheck(user_name, &pass_check);
-    } while (pass_check == 0);
-
-    printf("Username is %s", user_name);
+    char password[64 + 1];
+    char file_name[sizeof(user_name) + 6 + 1];
+    LoginUsername(user_name, file_name, sizeof(user_name));
+    LoginPassword(password, file_name, sizeof(password));
+    printf("Logged in!\n");
 }
