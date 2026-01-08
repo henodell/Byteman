@@ -19,6 +19,6 @@ target_include_directories(cli PUBLIC include)
 target_link_libraries(cli PUBLIC commands)
 
 # main exe
-add_executable(Byteman src/main.c src/utils.c)
+add_executable(Byteman src/main.c src/utils.c src/crypto.c)
 target_link_libraries(Byteman PUBLIC commands)
 target_link_libraries(Byteman PUBLIC cli)
