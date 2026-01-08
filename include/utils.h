@@ -35,7 +35,6 @@ enum AppState {
  * Determines whether the user is authenticated or not by
  * validating timestamp and token in `_byteman.session`.
  * 
- * 
  * @return OPEN if timestamp and token match
  * @return LOCKED otherwise
  */

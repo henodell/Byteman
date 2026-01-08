@@ -2,11 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <openssl/evp.h>
+#include <errno.h>
 #include <openssl/rand.h>
-#include "commands.h"
-#include "utils.h"
-#include "crypto.h"
+#include "LockedCommands.h"
+#include "Utils.h"
+#include "Crypto.h"
+
+#define USERNAME_MAX 20
+#define PASSWORD_MAX 64
 
 enum PassError {
     OK = 1,
@@ -17,14 +20,19 @@ enum PassError {
 
 // Private Functions //
 
+// Error handling
+void WriteHandleErrors(void) {
+    fprintf(stderr, RED "byteman file: error: fwrite failed: %s\n" TRY_BYTEMAN_HELP RESET, strerror(errno));
+    exit(1);
+}
+
 // Checks //
 
 // Username checks
 int UsernameCheck(char *user) {
     for (int i = 0; user[i]; i++) {
-        if (!isalnum(user[i])) {
+        if (!isalnum((unsigned char) user[i])) {
             return 0;
-            break;
         }
     }
 
@@ -44,13 +52,13 @@ enum PassError PasswordCheck(char *pass) {
     int space_check = 0;
     
     for (int i = 0; pass[i]; i++) {
-        if (isdigit(pass[i])) {
+        if (isdigit((unsigned char) pass[i])) {
             digit_check = 1;
-        } else if (isalpha(pass[i])) {
+        } else if (isalpha((unsigned char) pass[i])) {
             letter_check = 1;
-        } else if (ispunct(pass[i])) {
+        } else if (ispunct((unsigned char) pass[i])) {
             symbol_check = 1;
-        } else if(isspace(pass[i])) {
+        } else if(isspace((unsigned char) pass[i])) {
             space_check = 1;
         }
     }
@@ -66,15 +74,6 @@ enum PassError PasswordCheck(char *pass) {
     return WEAK;
 }
 
-// Password confirm checks
-int ConfirmCheck(char *buf, char *original) {
-    if (strcmp(buf, original) == 0) {
-        return 1;
-    }
-
-    return 0;
-}
-
 // Input //
 
 // Input for username
@@ -84,6 +83,17 @@ void GetUsername(char *buf, const int BUFFER_SIZE) {
         if (ReadInput(buf, BUFFER_SIZE) == 0) {
             exit(1);
         }
+
+        // empty strings
+        if (buf[0] == 0) {
+            continue;
+        } 
+        
+        if (strlen(buf) > USERNAME_MAX) {
+            printf(RED "Max 20 chars." RESET);
+            continue;
+        }
+
         char f_name[BUFFER_SIZE + 6 + 1];
         strcpy(f_name, buf);
         strcat(f_name, ".vault");
@@ -135,7 +145,7 @@ void GetPasswordConfirm(char *buf, const int BUFFER_SIZE, char *original) {
             exit(1);
         }
 
-        if (ConfirmCheck(buf, original) == 1) {
+        if (strcmp(buf, original) == 0) {
             break;
         }
     }
@@ -143,13 +153,10 @@ void GetPasswordConfirm(char *buf, const int BUFFER_SIZE, char *original) {
 
 // Public API //
 
-/*
-@brief Main signup handler
-*/
-void Signup() {
-    char user_name[20 + 1];
-    char password[64 + 1];
-    char pass_confirm[64 + 1];
+void Signup(void) {
+    char user_name[USERNAME_MAX + 1];
+    char password[PASSWORD_MAX + 1];
+    char pass_confirm[PASSWORD_MAX + 1];
 
     GetUsername(user_name, sizeof(user_name));
     GetPassword(password, sizeof(password));
@@ -172,18 +179,35 @@ void Signup() {
     unsigned char *md_value = NULL;
     unsigned int md_len = 0;
     unsigned char salt[SALT_SIZE];
-    RAND_bytes(salt, sizeof(salt));
+    if (RAND_bytes(salt, sizeof(salt)) != 1) {
+        fprintf(stderr, RED "byteman pass: error: RAND_bytes failed. " TRY_BYTEMAN_HELP RESET);
+        exit(1);
+    }
+
     DigestMessage((unsigned char *) password, strlen(password), &md_value, &md_len, salt, sizeof(salt));
 
+    OPENSSL_cleanse(password, sizeof(password));
+    OPENSSL_cleanse(pass_confirm, sizeof(pass_confirm));
     /*
     <user_length><user_name><salt><hash>
     */
 
     uint8_t user_len = strlen(user_name);
-    fwrite(&user_len, 1, 1, vault);
+    if (fwrite(&user_len, 1, 1, vault) != 1) {
+        WriteHandleErrors();
+    }
 
-    fwrite(user_name, 1, user_len, vault);
-    fwrite(salt, 1, SALT_SIZE, vault);
-    fwrite(md_value, 1, md_len, vault);
+    if (fwrite(user_name, 1, user_len, vault) != user_len) {
+        WriteHandleErrors();
+    }
+
+    if (fwrite(salt, 1, SALT_SIZE, vault) != SALT_SIZE) {
+        WriteHandleErrors();
+    }
+
+    if (fwrite(md_value, 1, md_len, vault) != md_len) {
+        WriteHandleErrors();
+    }
+    
     fclose(vault);
 }

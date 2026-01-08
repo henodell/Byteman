@@ -2,9 +2,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "commands.h"
-#include "cli.h"
-#include "utils.h"
+#include "LockedCommands.h"
+#include "Cli.h"
+#include "Utils.h"
 
 struct FuncEntry {
     const char name[8];
@@ -14,7 +14,7 @@ struct FuncEntry {
 struct FuncEntry locked_functions[] = {
     {"login", Login},
     {"signup", Signup},
-    {"get", Get}
+    // {"get", Get}
 };
 
 // Private Functions //
@@ -32,12 +32,10 @@ void LoopStructTbl(struct FuncEntry arr[], int size, char *comm) {
 }
 
 // Public API //
+
+
 const int NUM_LOCKED_FUNCTIONS = sizeof(locked_functions) / sizeof(locked_functions[0]);
 
-/*
-@brief Lookup for a command to run
-@param comm - command to run
-*/
 void DoLookup(char *comm) {
     enum AppState cur_state = GetAppState();
 

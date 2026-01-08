@@ -2,7 +2,7 @@
 #include <string.h>
 #include <errno.h>
 #include <openssl/evp.h>
-#include "utils.h"
+#include "Utils.h"
 
 // Public API //
 
@@ -10,7 +10,7 @@
 @brief Current state of program based on data from files
 @return AppState LOCKED or OPEN
 */
-enum AppState GetAppState() {
+enum AppState GetAppState(void) {
     return LOCKED;
     // read contents of .session
 }

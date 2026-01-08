@@ -2,8 +2,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
-#include "cli.h"
-#include "utils.h"
+#include "Cli.h"
+#include "Utils.h"
 
 // Private Functions //
 

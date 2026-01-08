@@ -31,23 +31,23 @@ else (DOXYGEN_FOUND)
 endif (DOXYGEN_FOUND)
 
 # Open Commands
-add_library(open_commands STATIC ${OPEN_COMMANDS_DIR}/get.c)
+add_library(open_commands STATIC ${OPEN_COMMANDS_DIR}/Get.c)
 target_include_directories(open_commands PUBLIC include)
 target_link_libraries(open_commands PRIVATE OpenSSL::Crypto)
 
 # Locked Commands
-add_library(locked_commands STATIC ${LOCKED_COMMANDS_DIR}/login.c ${LOCKED_COMMANDS_DIR}/signup.c)
+add_library(locked_commands STATIC ${LOCKED_COMMANDS_DIR}/Login.c ${LOCKED_COMMANDS_DIR}/Signup.c)
 target_include_directories(locked_commands PUBLIC include)
 target_link_libraries(locked_commands PRIVATE OpenSSL::Crypto)
 
 # ClI parsing
-add_library(cli STATIC ${CLI_DIR}/cli_parse.c ${CLI_DIR}/command_dispatch.c)
+add_library(cli STATIC ${CLI_DIR}/CliParse.c ${CLI_DIR}/CommandDispatch.c)
 target_include_directories(cli PUBLIC include)
 target_link_libraries(cli PUBLIC locked_commands)
 target_link_libraries(cli PUBLIC open_commands)
 
 # main exe
-add_executable(Byteman src/main.c ${UTILS_DIR}/crypto.c ${UTILS_DIR}/utils.c)
+add_executable(Byteman src/Main.c ${UTILS_DIR}/Crypto.c ${UTILS_DIR}/Utils.c)
 target_link_libraries(Byteman PUBLIC locked_commands)
 target_link_libraries(Byteman PUBLIC open_commands)
 target_link_libraries(Byteman PUBLIC cli)

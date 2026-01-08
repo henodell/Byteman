@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "commands.h"
+#include "LockedCommands.h"
 
 void Get() {
     printf("\nGet!");

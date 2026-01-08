@@ -4,9 +4,9 @@
 #include <openssl/evp.h>
 #include <string.h>
 #include <errno.h>
-#include "utils.h"
-#include "commands.h"
-#include "crypto.h"
+#include "Utils.h"
+#include "LockedCommands.h"
+#include "Crypto.h"
 
 // Private Functions //
 

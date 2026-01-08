@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <openssl/evp.h>
-#include "crypto.h"
+#include "Crypto.h"
 
 void DigestMessage(const unsigned char *msg, size_t len, unsigned char **digest, unsigned int *digest_len, char *salt, size_t salt_len) {
     EVP_MD_CTX *mdctx;
