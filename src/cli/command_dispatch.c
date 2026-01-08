@@ -14,7 +14,7 @@ struct FuncEntry {
 struct FuncEntry locked_functions[] = {
     {"login", Login},
     {"signup", Signup},
-    {"exit", ster}
+    {"get", Get}
 };
 
 // Private Functions //

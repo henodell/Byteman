@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
-#include <assert.h>
 #include "commands.h"
 #include "utils.h"
 #include "crypto.h"

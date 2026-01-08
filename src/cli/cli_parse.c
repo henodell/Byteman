@@ -7,7 +7,7 @@
 
 // Private Functions //
 
-// Helper to turn str into lowercase
+// Standardises input by making it all lowercase
 void ToLowerCase(char *s) {
     for (int i = 0; i < strlen(s); i++) {
         s[i] = tolower(s[i]);
@@ -16,11 +16,6 @@ void ToLowerCase(char *s) {
 
 // Public API //
 
-/*
-@brief Parse command line arguments to run the command
-@param argc Argument count
-@param char** Arguments
-*/
 void ParseArgs(int argc, char **argv) {
     // Bounds check
     if (argc > 5 || argc < 2) {
