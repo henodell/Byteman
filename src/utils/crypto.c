@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <openssl/evp.h>
+#include <openssl/sha.h>
 #include "Crypto.h"
 
-void DigestMessage(const unsigned char *msg, size_t len, unsigned char **digest, unsigned int *digest_len, char *salt, size_t salt_len) {
+void DigestMessage(const unsigned char *msg, size_t len, unsigned char digest[SHA256_DIGEST_LENGTH], unsigned int *digest_len, char *salt, size_t salt_len) {
     EVP_MD_CTX *mdctx;
 
     if ((mdctx = EVP_MD_CTX_new()) == NULL) {
-        printf("Error!\n");
+        // todo
     }
 
     if (EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL) != 1) {
@@ -22,11 +23,11 @@ void DigestMessage(const unsigned char *msg, size_t len, unsigned char **digest,
         printf("Error!\n");
     }
 
-    if ((*digest = (unsigned char *)OPENSSL_malloc(EVP_MD_size(EVP_sha256()))) == NULL) {
-        printf("Error!\n");
-    }
+    // if ((*digest = (unsigned char *)OPENSSL_malloc(EVP_MD_size(EVP_sha256()))) == NULL) {
+    //     printf("Error!\n");
+    // }
 
-    if (EVP_DigestFinal_ex(mdctx, *digest, digest_len) != 1) {
+    if (EVP_DigestFinal_ex(mdctx, digest, digest_len) != 1) {
         printf("Error!|n");
     }
 
