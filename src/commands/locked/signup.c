@@ -20,6 +20,10 @@ enum PassError {
 
 // Core //
 
+void PrintInfoMessage(char *msg) {
+    printf("[" BLUE "INFO" RESET "] " "%s\n", msg);
+}
+
 // Creates vault data to write into a file
 struct VaultData CreateVaultData(const char *user_name, const char *pw, unsigned char salt[SALT_SIZE]) {
     struct VaultData v = {0};
@@ -183,7 +187,8 @@ void Signup(void) {
         fprintf(stderr, RED "byteman file: error: %s\n", TRY_BYTEMAN_HELP  RESET, strerror(errno));
         exit(1);
     }
-    printf("[INFO] .vault file created\n");
+
+    PrintInfoMessage("Vault file created");
 
     unsigned char salt[SALT_SIZE];
     if (RAND_bytes(salt, SALT_SIZE) != 1) {
@@ -192,17 +197,18 @@ void Signup(void) {
     }
 
     struct VaultData v = CreateVaultData(user_name, password, salt);
-    printf("[INFO] Vault data created\n");
+    PrintInfoMessage("Creating vault data");
+
     if (WriteVaultData(vault, &v) != 1) {
         fprintf(stderr, RED "byteman file: error: %s\n", TRY_BYTEMAN_HELP RESET, strerror(errno));
         exit(1);
     }
-    printf("[INFO] Vault data written\n");
+    PrintInfoMessage("Writing vault data");
 
     OPENSSL_cleanse(password, sizeof(password));
     OPENSSL_cleanse(pass_confirm, sizeof(pass_confirm));
     OPENSSL_cleanse(&v, sizeof(v));
-    printf("[INFO] Buffers cleansed\n");
+    PrintInfoMessage("Cleansing buffers");
 
     fclose(vault);
     printf(GREEN "Successfully signed up!" RESET);

@@ -10,6 +10,12 @@
 /** @brief ANSI colour escape sequence for green */
 #define GREEN "\033[32m"
 
+/** @brief ANSI colour escape sequence for blue */
+#define BLUE "\033[94m"
+
+/**@brief ANSI color escape sequence for white */
+#define WHITE "\033[37m"
+
 /** @brief ANSI colour escape sequence to reset terminal formatting */
 #define RESET "\033[0m"
 /**@} */
