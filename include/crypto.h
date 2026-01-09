@@ -1,6 +1,8 @@
 #pragma once
 
-/**@brief Size of the salt to be used */
+/**
+ * @brief Size of the salt to be used 
+ */
 #define SALT_SIZE 16
 
 /**

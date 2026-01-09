@@ -8,9 +8,6 @@
 #include "Utils.h"
 #include "Crypto.h"
 
-#define USERNAME_MAX 20
-#define PASSWORD_MAX 64
-
 enum PassError {
     OK = 1,
     TOO_SHORT,
@@ -24,6 +21,13 @@ enum PassError {
 void WriteHandleErrors(void) {
     fprintf(stderr, RED "byteman file: error: fwrite failed: %s\n" TRY_BYTEMAN_HELP RESET, strerror(errno));
     exit(1);
+}
+
+// Helpers
+void WriteFile(FILE *vault, char *buf, const int SIZE) {
+    if (fwrite(buf, 1, SIZE, vault) != SIZE) {
+        WriteHandleErrors();
+    }
 }
 
 // Checks //
@@ -186,8 +190,10 @@ void Signup(void) {
 
     DigestMessage((unsigned char *) password, strlen(password), &md_value, &md_len, salt, sizeof(salt));
 
+    // remove password memory from stack
     OPENSSL_cleanse(password, sizeof(password));
     OPENSSL_cleanse(pass_confirm, sizeof(pass_confirm));
+
     /*
     <user_length><user_name><salt><hash>
     */
@@ -197,17 +203,9 @@ void Signup(void) {
         WriteHandleErrors();
     }
 
-    if (fwrite(user_name, 1, user_len, vault) != user_len) {
-        WriteHandleErrors();
-    }
-
-    if (fwrite(salt, 1, SALT_SIZE, vault) != SALT_SIZE) {
-        WriteHandleErrors();
-    }
-
-    if (fwrite(md_value, 1, md_len, vault) != md_len) {
-        WriteHandleErrors();
-    }
+    WriteFile(vault, user_name, user_len);
+    WriteFile(vault, salt, SALT_SIZE);
+    WriteFile(vault, md_value, md_len);
     
     fclose(vault);
 }

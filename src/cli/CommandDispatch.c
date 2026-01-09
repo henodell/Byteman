@@ -33,7 +33,6 @@ void LoopStructTbl(struct FuncEntry arr[], int size, char *comm) {
 
 // Public API //
 
-
 const int NUM_LOCKED_FUNCTIONS = sizeof(locked_functions) / sizeof(locked_functions[0]);
 
 void DoLookup(char *comm) {

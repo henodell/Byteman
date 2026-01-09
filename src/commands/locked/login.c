@@ -1,14 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <openssl/evp.h>
 #include <string.h>
+#include <openssl/sha.h>
 #include <errno.h>
 #include "Utils.h"
 #include "LockedCommands.h"
 #include "Crypto.h"
 
 // Private Functions //
+
+// Error Handling //
+
+void ReadHandleErrors(void) {
+    fprintf(stderr, RED "byteman read: error: fread failed\n" TRY_BYTEMAN_HELP RESET);
+    exit(1);
+}
+
+// Helper //
+
+void ReadFile(FILE *vault, char *buf, const int SIZE) {
+    if (fread(buf, 1, SIZE, vault) != SIZE) {
+        ReadHandleErrors();
+    }
+}
+
+void GetDigestAndSalt(FILE *vault, char *salt, char *hash) {
+    uint8_t user_len;
+    if (fread(&user_len, 1, 1, vault) != 1) {
+        ReadHandleErrors();
+    }
+    fseek(vault, user_len, SEEK_CUR);
+    
+    ReadFile(vault, salt, SALT_SIZE);
+    ReadFile(vault, hash, SHA256_DIGEST_LENGTH);
+    fclose(vault);
+}
+
+// Input
 
 // Ask for username login 
 void LoginUsername(char *buf, char *file_name, const int BUFFER_SIZE) {
@@ -24,131 +52,71 @@ void LoginUsername(char *buf, char *file_name, const int BUFFER_SIZE) {
         strcat(file_name, ".vault");
         
         if (FileExists(file_name)) {
-            break;
+            FILE *vault = fopen(file_name, "rb");
+            if (!vault) {
+                fprintf(stderr, RED "byteman file: error: %s\n" TRY_BYTEMAN_HELP RESET, strerror(errno));
+                exit(1);
+            }
+
+            uint8_t user_len;
+            if (fread(&user_len, 1, 1, vault) != 1) {
+                ReadHandleErrors();
+            }
+
+            char user_name[USERNAME_MAX];
+            ReadFile(vault, user_name, user_len);
+            fclose(vault);
+
+            if (strcmp(user_name, buf) == 0) {
+                break;
+            }
         }
     }
 }
 
-// Write a file into a buffer
-char *FileToBuffer(FILE *vault) {
-    // get file size
-    fseek(vault, 0, SEEK_END);
-    long file_size = ftell(vault);
-    fseek(vault, 0, SEEK_SET);
-    
-    if (file_size <= 0) {
-        return NULL;
-    }
-
-    char *buffer;
-    buffer = malloc(file_size + 1);
-    if (!buffer) {
-        return NULL;
-    }
-
-    size_t read = fread(buffer, 1, file_size, vault);
-    if (read != (size_t)file_size) {
-        free(buffer);
-        return NULL;
-    }
-
-    // for string use
-    buffer[file_size] = 0;
-    return buffer;
-}
-
-char *GetSalt(FILE *vault) {   
-    fseek(vault, 0, SEEK_SET); 
-    char *buf = FileToBuffer(vault);
-
-    // get starting position of salt
-    char *salt = strchr(buf, ':');
-    salt++;
-    
-    // replace ending : with null
-    strtok(salt, ":");
-    char *out = strdup(salt);
-    free(buf);
-    return out;
-}
-
-char *GetHash(FILE *vault) {
-    fseek(vault, 0, SEEK_SET); 
-    char *buf = FileToBuffer(vault);
-
-    // salt then hash
-    char *hash = strchr(buf, ':');
-    hash++;
-    hash = strchr(hash, ':');
-    hash++;
-
-    strtok(hash, ":");
-    char *out = strdup(hash);
-    free(buf);
-    return out;
-
-    // for (unsigned int i = 0; i < )
-}
-
-void HexDecode(const char *hex, unsigned char *out, size_t out_len) {
-    for (size_t i = 0; i < out_len; i++) {
-        sscanf(hex + (i * 2), "%2hhx", &out[i]);
-    }
-}
-
-// Ask for password to login
-void LoginPassword(unsigned char *buf, char *file_name, const int BUFFER_SIZE) {
-    FILE *vault = fopen(file_name, "r");
-    if (!vault) {
-        fprintf(stderr, RED "byteman file: error: %s\n" TRY_BYTEMAN_HELP RESET, errno);
-        exit(1);
-    }
-
+void LoginPassword(char *buf, char *file_name, const int BUFFER_SIZE) {
     while (1) {
-        printf("Enter your master password: ");
-        
-        if (ReadInput(buf, BUFFER_SIZE) == 0) {
-            break;
+        printf("Password: ");
+
+        if (ReadInput(buf, BUFFER_SIZE) != 1) {
+            fprintf(stderr, RED "byteman input: error: Input error or EOF.\n" TRY_BYTEMAN_HELP RESET);
+            exit(1); 
         }
 
-        char *saltHex = GetSalt(vault);
-        char *hash = GetHash(vault);
 
-        // write both back into binary
-        char salt[SALT_SIZE];
-        HexDecode(saltHex, salt, SALT_SIZE);
+        if (FileExists(file_name)) {
+            FILE *vault = fopen(file_name, "rb");
 
-        unsigned char *digest = NULL;
-        unsigned int md_len = 0;
-        DigestMessage(buf, strlen((char *)buf), &digest, &md_len, salt, SALT_SIZE);
+            if (!vault) {
+                fprintf(stderr, RED "byteman file: error: %s\n" TRY_BYTEMAN_HELP RESET, strerror(errno));
+                exit(1);
+            }
 
-        char digest_hex[EVP_MAX_MD_SIZE * 2 + 1];
+            unsigned char *md_value = NULL;
+            unsigned int md_len = 0;
 
-        for (unsigned int i  = 0; i < md_len; i++) {
-            sprintf(digest_hex, "%02x", digest[i]);
-        }
+            unsigned char cur_hash[SHA256_DIGEST_LENGTH];
+            unsigned char cur_salt[SALT_SIZE];
+            GetDigestAndSalt(vault, cur_salt, cur_hash); 
+            DigestMessage((unsigned char *)buf, strlen(buf), &md_value, &md_len, cur_salt, SALT_SIZE);
 
-        digest_hex[md_len] = 0;
-
-        if (strcmp(digest_hex, hash) == 0) {
-            break;
+            if (memcmp(md_value, cur_hash, md_len) == 0) {
+                break;
+            }
         }
     }
 }
 
 // Public API //
 
-/*
-@brief Main login handler
-*/
 void Login() {
-    char user_name[20 + 1];
-    unsigned char password[64 + 1];
+    char user_name[USERNAME_MAX + 1];
+    char password[PASSWORD_MAX + 1];
     char file_name[sizeof(user_name) + 6 + 1];
+    
     LoginUsername(user_name, file_name, sizeof(user_name));
     LoginPassword(password, file_name, sizeof(password));
-    FILE *vault = fopen(file_name, "r");
 
-    // LoginPassword(password, file_name, sizeof(password));
-    printf("Logged in!");
+
+    printf(GREEN "Successfully Logged in!" RESET);
 }

@@ -69,6 +69,6 @@ dkms.conf
 *.dwo
 
 # testing files
-.vault
+*.vault
 TODO.md
 
