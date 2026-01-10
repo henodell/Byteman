@@ -112,7 +112,7 @@ void GetUsername(char *user, const size_t BUFFER_SIZE) {
         snprintf(file_name, sizeof(file_name), "%s.vault", user);
         
         if (FileExists(file_name)) {
-            printf(RED "Use a different username.\n" RESET);
+            printf("Use a different username.\n");
             continue;
         }
 
@@ -134,13 +134,13 @@ void GetPassword(char *pw, const int BUFFER_SIZE) {
 
         switch (err) {
             case HAS_SPACE:
-                printf(RED "Do not use spaces.\n" RESET);
+                printf("Do not use spaces.\n");
                 break;
             case TOO_SHORT:
-                printf(RED "Use atleast 8 chars.\n" RESET);
+                printf("Use atleast 8 chars.\n");
                 break;
             case WEAK:
-                printf(RED "Your password must contain a digit, symbol and a letter.\n" RESET);
+                printf("Your password must contain a digit, symbol and a letter.\n");
                 break;
         }
 
@@ -180,31 +180,43 @@ void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
 
     FILE *vault = fopen(file_name, "wb");
     if (!vault) {
-        fprintf(stderr, "Unable to open .vault file, %s", strerror(errno));
+        fprintf(stderr, "\nUnable to open .vault file, %s", strerror(errno));
         exit(1);
     }
 
-    PrintInfoMessage("Vault file created");
+    if (g_flags->verbose) {
+        PrintInfoMessage("Vault file created.");
+    }
 
     unsigned char salt[SALT_SIZE];
     if (RAND_bytes(salt, SALT_SIZE) != 1) {
-        fprintf(stderr, "Unable to generate salt, %s", ERR_get_error());
+        fprintf(stderr, "\nUnable to generate salt, %s", ERR_get_error());
         exit(1);
+    }
+
+    if (g_flags->verbose) {
+        PrintInfoMessage("Salt generated.");
     }
 
     struct VaultData v = CreateVaultData(user_name, password, salt);
-    PrintInfoMessage("Creating vault data");
+    if (g_flags->verbose) {
+        PrintInfoMessage("Vault data created.");
+    }
 
     if (WriteVaultData(vault, &v) != 1) {
-        fprintf(stderr, "Unable to write into vault file, %s", strerror(errno));
+        fprintf(stderr, "\nUnable to write into vault file, %s", strerror(errno));
         exit(1);
     }
-    PrintInfoMessage("Writing vault data");
+    if (g_flags->verbose) {
+        PrintInfoMessage("Writing vault data.");
+    }
 
     OPENSSL_cleanse(password, sizeof(password));
     OPENSSL_cleanse(pass_confirm, sizeof(pass_confirm));
     OPENSSL_cleanse(&v, sizeof(v));
-    PrintInfoMessage("Cleansing buffers");
+    if (g_flags->verbose) {
+        PrintInfoMessage("Buffers cleansed.");
+    }
 
     fclose(vault);
     printf(GREEN "Successfully signed up!" RESET);

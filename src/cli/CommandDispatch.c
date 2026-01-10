@@ -25,7 +25,7 @@ void ExecuteCommand(struct FuncEntry arr[], int size, struct CliParams params) {
             return;
         }
     }
-    fprintf(stderr, "byteman: %s is not a command. See \'byteman --help\'.", params.comm);
+    fprintf(stderr, "\nbyteman: %s is not a command. See \'byteman --help\'.\n", params.comm);
     exit(1);
 }
 

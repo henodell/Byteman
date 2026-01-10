@@ -32,5 +32,5 @@ int FileExists(const char *name) {
 }
 
 void PrintInfoMessage(char *msg) {
-    printf("[" BLUE "INFO" RESET "] " "%s\n", msg);
+    printf("[INFO] %s\n", msg);
 }

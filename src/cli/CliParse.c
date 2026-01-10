@@ -6,8 +6,6 @@
 #include "Cli.h"
 #include "Utils.h"
 
-// Private Functions //
-
 struct GlobalFlags g_flags;
 
 const struct option long_options[] = {
@@ -25,8 +23,7 @@ void ParseGlobalFlags(int argc, char **argv) {
 
     while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
         if (opt == '?') {
-            fprintf(stderr, "usage: git [--version] [--verbose] [--help]\n"
-                            "<command> [<args]\n");
+            fprintf(stderr, "\nusage: byteman [--version] [--verbose] [--help] <command> [<args]\n");
             exit(1);
         }
     }
@@ -43,7 +40,7 @@ void ParseGlobalFlags(int argc, char **argv) {
     }
 
     if (g_flags.verbose) {
-        printf("Verbose mode enabled\n");
+        printf("Verbose mode enabled.\n");
         return;
     }
 }
@@ -59,8 +56,8 @@ void ToLowerCase(char *s) {
 
 void ParseArgs(int argc, char **argv) {
     // Bounds check
-    if ( argc < 2) {
-        fprintf(stderr, "expected atleast 2 args with a command, got %i args", argc);
+    if (argc < 2) {
+        fprintf(stderr, "\nexpected atleast 2 args with a command, got %i args", argc);
         exit(1);
     }
 
