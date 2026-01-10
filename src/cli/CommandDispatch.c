@@ -8,7 +8,7 @@
 
 struct FuncEntry {
     const char name[32];
-    void (*func)(CommandArgs *args, struct GlobalFlags *g_flags);
+    void (*fn)(CommandArgs *args, struct GlobalFlags *g_flags);
 };
 
 struct FuncEntry locked_functions[] = {
@@ -21,11 +21,11 @@ struct FuncEntry locked_functions[] = {
 void ExecuteCommand(struct FuncEntry arr[], int size, struct CliParams params) {
     for (int i = 0; i < size; i++) {
         if (strcmp(params.comm, arr[i].name) == 0) {
-            arr[i].func(params.args, params.g_flags);
+            arr[i].fn(params.args, params.g_flags);
             return;
         }
     }
-    fprintf(stderr, "\nbyteman: %s is not a command. See \'byteman --help\'.\n", params.comm);
+    fprintf(stderr, "byteman: %s is not a command. See \'byteman --help\'.\n", params.comm);
     exit(1);
 }
 

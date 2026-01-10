@@ -52,7 +52,7 @@ void ToLowerCase(char *s) {
 void ParseArgs(int argc, char **argv) {
     // Bounds check
     if (argc < 2) {
-        fprintf(stderr, "\nexpected atleast 2 args with a command, got %i args", argc);
+        fprintf(stderr, "expected atleast 2 args with a command, got %i args\n", argc);
         exit(1);
     }
 
@@ -60,7 +60,10 @@ void ParseArgs(int argc, char **argv) {
     char *command = argv[optind];
     ToLowerCase(command);
 
-    CommandArgs args = {argc, argv};
+    // create an array with only arguments for command
+    char **argv_args = argv + optind + 1;
+
+    CommandArgs args = {argc, argv_args};
     struct CliParams params = {command, &args, &g_flags};
 
     DoLookup(params);

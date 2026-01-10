@@ -186,14 +186,14 @@ void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
 
     FILE *vault = fopen(file_name, "wb");
     if (!vault) {
-        fprintf(stderr, "\nUnable to open .vault file, %s", strerror(errno));
+        fprintf(stderr, "Unable to open .vault file, %s\n", strerror(errno));
         exit(1);
     }
     PrintVerboseMessage("Vault file created", g_flags);
 
     unsigned char salt[SALT_SIZE];
     if (RAND_bytes(salt, SALT_SIZE) != 1) {
-        fprintf(stderr, "\nUnable to generate salt, %s", ERR_get_error());
+        fprintf(stderr, "Unable to generate salt, %s\n", ERR_get_error());
         exit(1);
     }
     PrintVerboseMessage("Salt generated", g_flags);
@@ -204,7 +204,7 @@ void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
 
 
     if (WriteVaultData(vault, &v) != 1) {
-        fprintf(stderr, "\nUnable to write into vault file, %s", strerror(errno));
+        fprintf(stderr, "Unable to write into vault file, %s\n", strerror(errno));
         exit(1);
     }
     PrintVerboseMessage("Vault data written", g_flags);
