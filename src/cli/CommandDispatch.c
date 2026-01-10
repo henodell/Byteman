@@ -8,7 +8,7 @@
 
 struct FuncEntry {
     const char name[8];
-    void (*func)(void);
+    void (*func)(CommandArgs *args, struct GlobalFlags *g_flags);
 };
 
 struct FuncEntry locked_functions[] = {
@@ -17,13 +17,11 @@ struct FuncEntry locked_functions[] = {
     // {"get", Get}
 };
 
-// Private Functions //
-
 // Loop through an array of functions to run it
-void LoopStructTbl(struct FuncEntry arr[], int size, char *comm) {
+void LoopStructTbl(struct FuncEntry arr[], int size, struct CliParams params) {
     for (int i = 0; i < size; i++) {
-        if (strcmp(comm, arr[i].name) == 0) {
-            arr[i].func();
+        if (strcmp(params.comm, arr[i].name) == 0) {
+            arr[i].func(params.args, params.g_flags);
             return;
         }
     }
@@ -35,11 +33,11 @@ void LoopStructTbl(struct FuncEntry arr[], int size, char *comm) {
 
 const int NUM_LOCKED_FUNCTIONS = sizeof(locked_functions) / sizeof(locked_functions[0]);
 
-void DoLookup(char *comm) {
+void DoLookup(struct CliParams params) {
     enum AppState cur_state = GetAppState();
 
     if (cur_state == LOCKED) {
-        LoopStructTbl(locked_functions, NUM_LOCKED_FUNCTIONS, comm);
+        LoopStructTbl(locked_functions, NUM_LOCKED_FUNCTIONS, params);
     }
         // loopTable()
     // }

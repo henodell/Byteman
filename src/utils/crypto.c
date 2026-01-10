@@ -23,10 +23,6 @@ void DigestMessage(const unsigned char *msg, size_t len, unsigned char digest[SH
         printf("Error!\n");
     }
 
-    // if ((*digest = (unsigned char *)OPENSSL_malloc(EVP_MD_size(EVP_sha256()))) == NULL) {
-    //     printf("Error!\n");
-    // }
-
     if (EVP_DigestFinal_ex(mdctx, digest, digest_len) != 1) {
         printf("Error!|n");
     }

@@ -13,9 +13,6 @@
 /** @brief ANSI colour escape sequence for blue */
 #define BLUE "\033[94m"
 
-/**@brief ANSI color escape sequence for white */
-#define WHITE "\033[37m"
-
 /** @brief ANSI colour escape sequence to reset terminal formatting */
 #define RESET "\033[0m"
 /**@} */
@@ -67,3 +64,12 @@ int FileExists(const char *name);
  * @return 0 on failure (EOF or input error)
  */
 int ReadInput(char *buf, const int BUFFER_SIZE);
+
+
+/**
+ * @brief Prints out an info message
+ * Prints out an information message with the INFO being blue
+ * 
+ * @param msg Message to print
+ */
+void PrintInfoMessage(char *msg);

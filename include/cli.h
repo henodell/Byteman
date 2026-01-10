@@ -1,6 +1,36 @@
 #pragma once
 
 /**
+ * @struct GlobalFlags
+ * @brief Struct to hold global flags
+ */
+struct GlobalFlags {
+    int version; /**< Gets version of current byteman */
+    int verbose; /**< Writes [INFO] to output */
+    int help; /**< Writes how to use byteman */
+};
+
+/**
+ * @struct CommandArgs
+ * @brief Struct to hold all the arguments to pass into commands
+ */
+typedef struct {
+    int argc; /**< Argument count */
+    char **argv; /**< Array of arguments */
+} CommandArgs;
+
+
+/**
+ * @struct CliParams
+ * @brief Struct to hold all params to pass around
+ */
+struct CliParams {
+    char *comm; /**Command to be used */
+    CommandArgs *args; /**Argc and argv for command use */
+    struct GlobalFlags *g_flags; /**Current global flags */
+};
+
+/**
  * @brief Parses command-line arguments
  * 
  * This function does bounds checks and then standardises input.
@@ -18,6 +48,6 @@ void ParseArgs(int argc, char **argv);
  * on that AppState to execute.
  * Prints an error message for byteman lookup on failure.
  * 
- * @param comm Command to execute
+ * @param params struct which contains command, args, and the global flags
  */
-void DoLookup(char *comm);
+void DoLookup(struct CliParams params);

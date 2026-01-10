@@ -1,4 +1,5 @@
 #pragma once
+#include "Cli.h"
 
 /**
  * @defgroup User Limits
@@ -20,7 +21,10 @@
  * 
  * Asks the user to create a new account. Validates the input and 
  * stores the info securely in a .vault file. Prints errors on failure. 
+ * 
+ * @param args - Struct containing argc and argv
+ * @param g_flags - Struct containing global flags such as --verbose
  */
-void Signup(void);
+void Signup(CommandArgs *args, struct GlobalFlags *g_flags);
 
-void Login(void);
+void Login(CommandArgs *args, struct GlobalFlags *g_flags);

@@ -30,3 +30,7 @@ int FileExists(const char *name) {
 
     return 0;
 }
+
+void PrintInfoMessage(char *msg) {
+    printf("[" BLUE "INFO" RESET "] " "%s\n", msg);
+}

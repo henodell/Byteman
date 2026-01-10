@@ -11,6 +11,6 @@
 
 // Public API //
 
-void Login() {
+void Login(CommandArgs *args, struct GlobalFlags *g_flags) {
     printf(GREEN "Successfully Logged in!" RESET);
 }

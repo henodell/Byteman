@@ -20,10 +20,6 @@ enum PassError {
 
 // Core //
 
-void PrintInfoMessage(char *msg) {
-    printf("[" BLUE "INFO" RESET "] " "%s\n", msg);
-}
-
 // Creates vault data to write into a file
 struct VaultData CreateVaultData(const char *user_name, const char *pw, unsigned char salt[SALT_SIZE]) {
     struct VaultData v = {0};
@@ -169,7 +165,7 @@ void GetPasswordConfirm(char *pw, const int BUFFER_SIZE, char *original) {
 }
 
 // Handler
-void Signup(void) {
+void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
     char user_name[USERNAME_MAX + 1];
     char password[PASSWORD_MAX + 1];
     char pass_confirm[PASSWORD_MAX + 1];
