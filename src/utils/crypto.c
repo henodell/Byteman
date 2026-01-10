@@ -4,7 +4,7 @@
 #include "Crypto.h"
 
 void handleErrors(char *msg) {
-    printf("\n%s\n", msg);
+    fprintf(stderr, "\n%s\n", msg);
     exit(1);
 }
 
