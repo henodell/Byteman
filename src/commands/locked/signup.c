@@ -180,7 +180,7 @@ void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
 
     FILE *vault = fopen(file_name, "wb");
     if (!vault) {
-        fprintf(stderr, RED "byteman file: error: %s\n", TRY_BYTEMAN_HELP  RESET, strerror(errno));
+        fprintf(stderr, "Unable to open .vault file, %s", strerror(errno));
         exit(1);
     }
 
@@ -188,7 +188,7 @@ void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
 
     unsigned char salt[SALT_SIZE];
     if (RAND_bytes(salt, SALT_SIZE) != 1) {
-        fprintf(stderr, RED "byteman rand: error: %s\n", TRY_BYTEMAN_HELP RESET, ERR_get_error());
+        fprintf(stderr, "Unable to generate salt, %s", ERR_get_error());
         exit(1);
     }
 
@@ -196,7 +196,7 @@ void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
     PrintInfoMessage("Creating vault data");
 
     if (WriteVaultData(vault, &v) != 1) {
-        fprintf(stderr, RED "byteman file: error: %s\n", TRY_BYTEMAN_HELP RESET, strerror(errno));
+        fprintf(stderr, "Unable to write into vault file, %s", strerror(errno));
         exit(1);
     }
     PrintInfoMessage("Writing vault data");

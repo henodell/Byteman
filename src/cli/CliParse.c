@@ -25,7 +25,8 @@ void ParseGlobalFlags(int argc, char **argv) {
 
     while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
         if (opt == '?') {
-            fprintf(stderr, "Unknown option. try byteman --help\n");
+            fprintf(stderr, "usage: git [--version] [--verbose] [--help]\n"
+                            "<command> [<args]\n");
             exit(1);
         }
     }
@@ -47,11 +48,9 @@ void ParseGlobalFlags(int argc, char **argv) {
     }
 }
 
-//  byteman [global-flags] <command> [command-flags]
-
 // Standardises input by making it all lowercase
 void ToLowerCase(char *s) {
-    for (int i = 0; i < strlen(s); i++) {
+    for (int i = 0; s[i]; i++) {
         s[i] = tolower(s[i]);
     }
 }
@@ -60,8 +59,8 @@ void ToLowerCase(char *s) {
 
 void ParseArgs(int argc, char **argv) {
     // Bounds check
-    if (argc > 5 || argc < 2) {
-        fprintf(stderr, RED "byteman parse: error: expected 2-5 args got %d\n" TRY_BYTEMAN_HELP RESET, argc);
+    if ( argc < 2) {
+        fprintf(stderr, "expected atleast 2 args with a command, got %i args", argc);
         exit(1);
     }
 
