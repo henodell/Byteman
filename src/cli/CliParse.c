@@ -6,7 +6,7 @@
 #include "Cli.h"
 #include "Utils.h"
 
-struct GlobalFlags g_flags;
+struct GlobalFlags g_flags = {0};
 
 const struct option long_options[] = {
     {"version", no_argument, &g_flags.version, 1},
@@ -23,25 +23,20 @@ void ParseGlobalFlags(int argc, char **argv) {
 
     while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
         if (opt == '?') {
-            fprintf(stderr, "\nusage: byteman [--version] [--verbose] [--help] <command> [<args]\n");
+            fprintf(stderr, "byteman: unknown option. See \'byteman --help\'.");
             exit(1);
         }
     }
 
     // Immediate flags
     if (g_flags.help) {
-        printf("Usage: byteman [--verbose] [--version] [--help] <command> <command-flags>");
+        printf("Usage: byteman [--version] [--verbose] [--help] <command> [<args>]");
         exit(0);
     }
 
     if (g_flags.version) {
         printf("byteman version 0.1.0");
         exit(0);
-    }
-
-    if (g_flags.verbose) {
-        printf("Verbose mode enabled.\n");
-        return;
     }
 }
 

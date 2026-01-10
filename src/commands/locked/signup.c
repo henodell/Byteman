@@ -85,6 +85,12 @@ enum PassError PasswordCheck(const char *pw) {
 
 // Shell //
 
+void PrintVerboseMessage(char *msg, struct GlobalFlags *g_flags) {
+    if (g_flags->verbose) {
+        PrintInfoMessage(msg);
+    }
+}
+
 // Writing vault data to file
 int WriteVaultData(FILE *vault, struct VaultData *v) {
     if (fwrite(v, sizeof(*v), 1, vault) != 1) {
@@ -183,40 +189,31 @@ void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
         fprintf(stderr, "\nUnable to open .vault file, %s", strerror(errno));
         exit(1);
     }
-
-    if (g_flags->verbose) {
-        PrintInfoMessage("Vault file created.");
-    }
+    PrintVerboseMessage("Vault file created", g_flags);
 
     unsigned char salt[SALT_SIZE];
     if (RAND_bytes(salt, SALT_SIZE) != 1) {
         fprintf(stderr, "\nUnable to generate salt, %s", ERR_get_error());
         exit(1);
     }
+    PrintVerboseMessage("Salt generated", g_flags);
 
-    if (g_flags->verbose) {
-        PrintInfoMessage("Salt generated.");
-    }
 
     struct VaultData v = CreateVaultData(user_name, password, salt);
-    if (g_flags->verbose) {
-        PrintInfoMessage("Vault data created.");
-    }
+    PrintVerboseMessage("Vault data created", g_flags);
+
 
     if (WriteVaultData(vault, &v) != 1) {
         fprintf(stderr, "\nUnable to write into vault file, %s", strerror(errno));
         exit(1);
     }
-    if (g_flags->verbose) {
-        PrintInfoMessage("Writing vault data.");
-    }
+    PrintVerboseMessage("Vault data written", g_flags);
+
 
     OPENSSL_cleanse(password, sizeof(password));
     OPENSSL_cleanse(pass_confirm, sizeof(pass_confirm));
     OPENSSL_cleanse(&v, sizeof(v));
-    if (g_flags->verbose) {
-        PrintInfoMessage("Buffers cleansed.");
-    }
+    PrintVerboseMessage("Buffers cleansed", g_flags);
 
     fclose(vault);
     printf(GREEN "Successfully signed up!" RESET);
