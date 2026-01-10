@@ -8,6 +8,7 @@
 
 struct GlobalFlags g_flags = {0};
 
+// for getopts_long
 const struct option long_options[] = {
     {"version", no_argument, &g_flags.version, 1},
     {"verbose", no_argument, &g_flags.verbose, 1},
@@ -28,7 +29,7 @@ void ParseGlobalFlags(int argc, char **argv) {
         }
     }
 
-    // Immediate flags
+    // immediate flags
     if (g_flags.help) {
         printf("Usage: byteman [--version] [--verbose] [--help] <command> [<args>]");
         exit(0);
@@ -60,7 +61,7 @@ void ParseArgs(int argc, char **argv) {
     char *command = argv[optind];
     ToLowerCase(command);
 
-    // create an array with only arguments for command
+    // create an array with only arguments for the command
     char **argv_args = argv + optind + 1;
 
     CommandArgs args = {argc, argv_args};

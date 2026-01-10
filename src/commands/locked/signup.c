@@ -202,7 +202,6 @@ void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
     struct VaultData v = CreateVaultData(user_name, password, salt);
     PrintVerboseMessage("Vault data created", g_flags);
 
-
     if (WriteVaultData(vault, &v) != 1) {
         fprintf(stderr, "Unable to write into vault file, %s\n", strerror(errno));
         exit(1);
