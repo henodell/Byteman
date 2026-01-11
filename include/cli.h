@@ -37,7 +37,7 @@ struct CliParams {
  * Prints an error message for byteman parse on failure.
  * 
  * @param argc Argument count
- * @param argv Array of arguments
+ * @param argv Array of arguments containing only the arguments for the command
  */
 void ParseArgs(int argc, char **argv);
 

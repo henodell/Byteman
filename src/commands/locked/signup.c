@@ -9,8 +9,6 @@
 #include "Utils.h"
 #include "Crypto.h"
 
-#define VAULT_EXT ".vault"
-
 enum PassError {
     OK = 1,
     TOO_SHORT,
@@ -20,10 +18,13 @@ enum PassError {
 
 // Core //
 
+int cur_version = 1;
+
 // Creates vault data to write into a file
 struct VaultData CreateVaultData(const char *user_name, const char *pw, unsigned char salt[SALT_SIZE]) {
     struct VaultData v = {0};
 
+    v.version = cur_version;
     v.user_len = strlen(user_name);
     strcpy(v.user_name, user_name);
     
@@ -207,7 +208,6 @@ void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
         exit(1);
     }
     PrintVerboseMessage("Vault data written", g_flags);
-
 
     OPENSSL_cleanse(password, sizeof(password));
     OPENSSL_cleanse(pass_confirm, sizeof(pass_confirm));

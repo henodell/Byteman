@@ -8,11 +8,21 @@
 #define SALT_SIZE 16
 
 /**
+ * @brief Vault Extension
+ */
+#define VAULT_EXT ".vault"
+
+/**
+ * @brief Current version of vault data being used
+ */
+extern int cur_version;
+
+/**
  * @struct VaultData
  * @brief The data to store in a .vault 
  */
 struct VaultData {
-    uint8_t version; /**< Version of the data for future use*/
+    uint8_t version; /**< Version of the data for future changes*/
     uint8_t user_len; /**< Length of the username */
     char user_name[USERNAME_MAX]; /**< Non null-terminated username */
     unsigned int salt_len; /**< Length of the salt*/

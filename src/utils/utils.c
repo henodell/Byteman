@@ -12,7 +12,7 @@ enum AppState GetAppState(void) {
     // read contents of .session
 }
 
-int ReadInput(char *buf, const int BUFFER_SIZE) {
+int ReadInput(char *buf, const size_t BUFFER_SIZE) {
     if (fgets(buf, BUFFER_SIZE, stdin) == NULL) {
         return 0;
     }

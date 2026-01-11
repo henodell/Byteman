@@ -58,7 +58,7 @@ int FileExists(const char *name);
  * @return 1 on success 
  * @return 0 on failure (EOF or input error)
  */
-int ReadInput(char *buf, const int BUFFER_SIZE);
+int ReadInput(char *buf, const size_t BUFFER_SIZE);
 
 
 /**
