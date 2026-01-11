@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
+#include <string.h>
 #include "Crypto.h"
+
+#define ITERATIONS 10000
+#define KEY_LENGTH 32
 
 void handleErrors(char *msg) {
     fprintf(stderr, "\n%s\n", msg);
@@ -36,3 +40,10 @@ void DigestMessage(const unsigned char *msg, size_t len, unsigned char digest[SH
 
     EVP_MD_CTX_free(mdctx);
 }
+
+void DeriveKeyPbkdf2(const char *password, const unsigned char salt[SALT_SIZE], unsigned char *key, const unsigned int KEY_LEN) {
+    int pass_len = (int) strlen(password);
+    if (PKCS5_PBKDF2_HMAC(password, pass_len, salt, SALT_SIZE, ITERATIONS, EVP_sha256(), KEY_LEN, key) != 1) {
+        handleErrors("PBKDF2 key derivation failed");
+    }
+} 

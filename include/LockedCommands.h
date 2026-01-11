@@ -17,6 +17,16 @@
 /**@} */
 
 /**
+ * @brief Vault Extension
+ */
+#define VAULT_EXT ".vault"
+
+/**
+ * @brief Session management
+ */
+#define SESSION_FILE "_byteman.session"
+
+/**
  * @brief Executes the "signup" command
  * 
  * Asks the user to create a new account. Validates the input and 

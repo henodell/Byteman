@@ -1,16 +1,12 @@
 #pragma once
 #include <openssl/sha.h>
+#include <time.h>
 #include "LockedCommands.h"
 
 /**
  * @brief Size of the salt to be used 
  */
 #define SALT_SIZE 16
-
-/**
- * @brief Vault Extension
- */
-#define VAULT_EXT ".vault"
 
 /**
  * @brief Current version of vault data being used
@@ -32,6 +28,17 @@ struct VaultData {
 };
 
 /**
+ * @struct Session
+ * @brief Data to store for each session
+ */
+struct Session {
+    char *user_name; /**< Null-terminated username*/
+    unsigned char *key; /**< Key derived from master password */
+    unsigned char *salt;
+    time_t time_stamp; /**< Timestamp for expiration */
+};
+
+/**
  * @brief Computes a SHA-256 digest of a message with a salt
  * 
  * @param msg Pointer to a message (must not be NULL)
@@ -42,3 +49,5 @@ struct VaultData {
  * @param salt_len The length of the salt being used (SALT_SIZE)
  */
 void DigestMessage(const unsigned char *msg, size_t len, unsigned char digest[SHA256_DIGEST_LENGTH], unsigned int *digest_len, char salt[SALT_SIZE], size_t salt_len);
+
+void DeriveKeyPbkdf2(const char *password, const unsigned char salt[SALT_SIZE], unsigned char *key, const unsigned int KEY_LEN);

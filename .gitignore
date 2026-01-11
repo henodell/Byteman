@@ -70,5 +70,6 @@ dkms.conf
 
 # testing files
 *.vault
+_byteman.session
 TODO.md
 

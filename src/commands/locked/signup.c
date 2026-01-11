@@ -6,6 +6,7 @@
 #include <openssl/rand.h>
 #include <openssl/err.h>
 #include "Utils.h"
+#include "LockedCommands.h"
 #include "Crypto.h"
 
 enum PassError {

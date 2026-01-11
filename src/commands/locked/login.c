@@ -2,15 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/sha.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
 #include <openssl/crypto.h>
 #include <errno.h>
 #include "Utils.h"
+#include "LockedCommands.h"
 #include "Crypto.h"
+
 
 // Shell //
 
 // Gets input for username and opens a vault with rb
 char *LoginUsername(char *buf, const size_t BUFFER_SIZE) {
+    
     while (1) {
         printf("Username: ");
         if (ReadInput(buf, BUFFER_SIZE) != 1) {
@@ -93,7 +98,7 @@ void Login(CommandArgs *args, struct GlobalFlags *g_flags) {
     char *file_name = LoginUsername(user_name, sizeof(user_name));
     vault = fopen(file_name, "rb");
     if (!vault) {
-        fprintf(stderr, "Unable to open a file in mode \'rb\', %s", strerror(errno));
+        fprintf(stderr, "Unable to open a vault in mode \'rb\', %s", strerror(errno));
         exit(1);
     }
 
@@ -102,5 +107,20 @@ void Login(CommandArgs *args, struct GlobalFlags *g_flags) {
     LoginPassword(password, sizeof(password), vault);
     fclose(vault);
 
-    printf(GREEN "Successfully Logged in!" RESET);
+    FILE *session = fopen("_byteman.session", "wb");
+
+    unsigned char *salt;
+    if (RAND_bytes(salt, SALT_SIZE) != 1) {
+        fprintf(stderr, "Unable to generate salt, %s\n", ERR_get_error());
+        exit(1);
+    }
+
+    unsigned char *key;
+    DeriveKeyPbkdf2(password, salt, key, SHA256_DIGEST_LENGTH);
+    struct Session ses = {user_name, key, salt, time(NULL)};
+
+    fwrite(&ses, sizeof(ses), 1, session);
+    fclose(session);
+
+    printf(GREEN "Successfully logged in!" RESET);
 }
