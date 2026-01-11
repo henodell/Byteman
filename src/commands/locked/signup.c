@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <openssl/rand.h>
 #include <openssl/err.h>
-#include "LockedCommands.h"
 #include "Utils.h"
 #include "Crypto.h"
 

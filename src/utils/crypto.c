@@ -10,7 +10,7 @@ void handleErrors(char *msg) {
 
 // Public API 
 
-void DigestMessage(const unsigned char *msg, size_t len, unsigned char digest[SHA256_DIGEST_LENGTH], unsigned int *digest_len, char *salt, size_t salt_len) {
+void DigestMessage(const unsigned char *msg, size_t len, unsigned char digest[SHA256_DIGEST_LENGTH], unsigned int *digest_len, char salt[SALT_SIZE], size_t salt_len) {
     EVP_MD_CTX *mdctx;
 
     if ((mdctx = EVP_MD_CTX_new()) == NULL) {

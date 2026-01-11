@@ -26,7 +26,7 @@ struct VaultData {
     uint8_t user_len; /**< Length of the username */
     char user_name[USERNAME_MAX]; /**< Non null-terminated username */
     unsigned int salt_len; /**< Length of the salt*/
-    unsigned char salt[SALT_SIZE]; /**< Salt */
+    char salt[SALT_SIZE]; /**< Salt */
     unsigned int hash_len; /**< Length of the hash */
     unsigned char hash[SHA256_DIGEST_LENGTH]; /**< Hash */
 };
@@ -38,7 +38,7 @@ struct VaultData {
  * @param len Length of the message
  * @param digest Char array where the resulting digest will be stored (must be atleast 32)
  * @param digest_len Pointer to an int where the length of the digest will be stored
- * @param salt Pointer to the salt to be used
+ * @param salt Char array with salt to be used (must be atleast 16)
  * @param salt_len The length of the salt being used (SALT_SIZE)
  */
-void DigestMessage(const unsigned char *msg, size_t len, unsigned char digest[SHA256_DIGEST_LENGTH], unsigned int *digest_len, char *salt, size_t salt_len);
+void DigestMessage(const unsigned char *msg, size_t len, unsigned char digest[SHA256_DIGEST_LENGTH], unsigned int *digest_len, char salt[SALT_SIZE], size_t salt_len);

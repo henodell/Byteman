@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
 #include <errno.h>
 #include "Utils.h"
-#include "LockedCommands.h"
 #include "Crypto.h"
 
 // Shell //
@@ -24,6 +22,10 @@ char *LoginUsername(char *buf, const size_t BUFFER_SIZE) {
 
         if (FileExists(file_name)) {
             char *name = strdup(file_name);
+            if (!name) {
+                fprintf(stderr, "strdup failed: %s", strerror(errno));
+                exit(1);
+            }
             return name;
         }
     }
@@ -53,6 +55,14 @@ struct VaultData GetVaultData(FILE *vault) {
 
 // Get input for password and verify against password
 void LoginPassword(char *buf, const size_t BUFFER_SIZE, FILE *vault) {
+    struct VaultData v = GetVaultData(vault);
+
+    if (v.version != cur_version) {
+        fprintf(stderr, "Version of data does not match." 
+            "Ensure you used the same version of byteman for both signup and login");
+        exit(1);
+    }
+    
     while (1) {
         printf("Password: ");
 
@@ -61,15 +71,17 @@ void LoginPassword(char *buf, const size_t BUFFER_SIZE, FILE *vault) {
             exit(1);
         }
 
-        struct VaultData v = GetVaultData(vault);
-        
-        if (v.version != cur_version) {
-            fprintf(stderr, "Version of data does not match." 
-                "Ensure you used the same version of byteman for both signup and login");
-            exit(1);
+        unsigned char digest[SHA256_DIGEST_LENGTH];
+        unsigned int digest_len = 0;
+
+        DigestMessage(buf, strlen(buf), digest, &digest_len, v.salt, v.salt_len);
+
+        if (digest_len == v.hash_len && CRYPTO_memcmp(digest, v.hash, v.hash_len) == 0) {
+            OPENSSL_cleanse(buf, strlen(buf));
+            OPENSSL_cleanse(digest, digest_len);
+            OPENSSL_cleanse(&v, sizeof(v));
+            break;
         }
-
-
     }
 } 
 
@@ -88,6 +100,7 @@ void Login(CommandArgs *args, struct GlobalFlags *g_flags) {
     free(file_name);
 
     LoginPassword(password, sizeof(password), vault);
+    fclose(vault);
 
     printf(GREEN "Successfully Logged in!" RESET);
 }
