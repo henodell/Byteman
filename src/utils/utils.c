@@ -9,17 +9,6 @@
 
 enum AppState GetAppState(void) {
     return LOCKED;
-    // read contents of .session
-}
-
-int ReadInput(char *buf, const size_t BUFFER_SIZE) {
-    if (fgets(buf, BUFFER_SIZE, stdin) == NULL) {
-        return 0;
-    }
-
-    buf[strcspn(buf, "\n")] = 0;
-
-    return 1;
 }
 
 int FileExists(const char *name) {

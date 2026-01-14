@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <openssl/rand.h>
 #include <openssl/err.h>
+#include <cJSON.h>
 #include "Utils.h"
 #include "LockedCommands.h"
 #include "Crypto.h"
@@ -16,26 +17,53 @@ enum PassError {
     WEAK
 };
 
+struct GlobalFlags cur_flags = {0};
+
 // Core //
 
+// Version of data being used
 int cur_version = 1;
 
 // Creates vault data to write into a file
-struct VaultData CreateVaultData(const char *user_name, const char *pw, unsigned char salt[SALT_SIZE]) {
+struct VaultData CreateVaultData(const char *user_name, unsigned char *pw, unsigned char salt[SALT_SIZE]) {
     struct VaultData v = {0};
 
     v.version = cur_version;
-    v.user_len = strlen(user_name);
-    strcpy(v.user_name, user_name);
-    
-    v.salt_len = SALT_SIZE;
+    snprintf(v.user_name, sizeof(v.user_name), "%s", user_name);
+
     memcpy(v.salt, salt, SALT_SIZE);
-    DigestMessage((unsigned char *)pw, strlen(pw), v.hash, &v.hash_len, salt, SALT_SIZE);
+    DeriveArgon2ID(pw, salt, v.hash);
 
     return v;
 }
 
-// Input and Check Functions //
+// Transform struct into JSON
+char *VaultDataToJson(struct VaultData *v) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "version", v->version);
+    cJSON_AddStringToObject(json, "user_name", v->user_name);
+
+    char salt_b64[ENCODE_SIZE];
+    if (EncodeBase64(v->salt, SALT_SIZE, salt_b64, sizeof(salt_b64)) == 0) {
+        fprintf(stderr, "Unable to encode salt in base64");
+        exit(1);
+    }
+
+    cJSON_AddStringToObject(json, "salt", salt_b64);
+
+    char hash_b64[ENCODE_SIZE];
+    if (EncodeBase64(v->hash, HASH_SIZE, hash_b64, sizeof(hash_b64)) == 0) {
+        fprintf(stderr, "Unable to encode hash in base64");
+        exit(1);
+    }
+
+    cJSON_AddStringToObject(json, "hash", hash_b64);
+
+    char *json_str = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+
+    return json_str;
+}
 
 // Checks username to make sure its alphanumeric and ascii
 int UsernameCheck(const char *user) {
@@ -86,56 +114,60 @@ enum PassError PasswordCheck(const char *pw) {
 
 // Shell //
 
-void PrintVerboseMessage(char *msg, struct GlobalFlags *g_flags) {
-    if (g_flags->verbose) {
+// Print messages for --verbose
+void PrintVerboseMessage(char *msg) {
+    if (cur_flags.verbose) {
         PrintInfoMessage(msg);
     }
 }
 
-// Writing vault data to file
-int WriteVaultData(FILE *vault, struct VaultData *v) {
-    if (fwrite(v, sizeof(*v), 1, vault) != 1) {
-        return 0;
+// Writing json vault data to file
+void WriteJsonToFile(FILE *vault, char *json_str) {
+    if (fputs(json_str, vault) == EOF) {
+        fprintf(stderr, "Unable to write json into file");
+        exit(1);
     }
-
-    return 1;
 }
 
+// Flush stdin
+void Flush(char *buf) {
+    if (strchr(buf, '\n') == NULL) {
+        int c;
+        while ((c = getchar()) != EOF && c != '\n');
+    }
+}
 
 // Gets input from username
-void GetUsername(char *user, const size_t BUFFER_SIZE) {
-    while (1) {
+void GetUsername(char *user, char *file_name, const size_t BUFFER_SIZE, const size_t FILE_BUF_SIZE) {
+    do {
         printf("Enter a username(20 chars, alphanumeric): ");
-        if (!ReadInput(user, BUFFER_SIZE)) {
+        if (fgets(user, BUFFER_SIZE, stdin) == NULL) {
+            fprintf(stderr, "\nUnable to read input due to input error or EOF.\n");
             exit(1);
         }
 
-        // handle empty strings
-        if (user[0] == 0) {
-            continue;
-        }
+        Flush(user);
+        user[strcspn(user, "\n")] = 0;
 
-        char file_name[USERNAME_MAX + sizeof(VAULT_EXT) + 1];
-        snprintf(file_name, sizeof(file_name), "%s.vault", user);
+        snprintf(file_name, FILE_BUF_SIZE, "%s%s", user, VAULT_EXT);
         
         if (FileExists(file_name)) {
             printf("Use a different username.\n");
             continue;
         }
-
-        if (UsernameCheck(user)) {
-            break;
-        } 
-    }
+    } while (UsernameCheck(user) != 1);
 }
 
 // Gets input for password
-void GetPassword(char *pw, const int BUFFER_SIZE) {
+void GetPassword(char *pw, const size_t BUFFER_SIZE) {
     while (1) {
         printf("Enter a password(max 64 chars, min 8 chars): ");
-        if (!ReadInput(pw, BUFFER_SIZE)) {
+        if (fgets(pw, BUFFER_SIZE, stdin) == NULL) {
+            fprintf(stderr, "\nUnable to read input due to input error or EOF.\n");
             exit(1);
         }
+        Flush(pw);
+        pw[strcspn(pw, "\n")] = 0;
 
         enum PassError err = PasswordCheck(pw);
 
@@ -158,62 +190,61 @@ void GetPassword(char *pw, const int BUFFER_SIZE) {
 }
 
 // Gets input for password confirmation
-void GetPasswordConfirm(char *pw, const int BUFFER_SIZE, char *original) {
-    while (1) {
+void GetPasswordConfirm(char *pw, const int BUFFER_SIZE, const char *original) {
+    do {
         printf("Confirm your master password: ");
-        if (!ReadInput(pw, BUFFER_SIZE)) {
+        if (fgets(pw, BUFFER_SIZE, stdin) == NULL) {
+            fprintf(stderr, "\nUnable to read input due to input error or EOF.\n");
             exit(1);
         }
 
-        if (strcmp(pw, original) == 0) {
-            break;
-        }
-    }
+        Flush(pw);
+        pw[strcspn(pw, "\n")] = 0;
+        
+    } while (strcmp(pw, original) != 0);
 }
 
 // Handler
 void Signup(CommandArgs *args, struct GlobalFlags *g_flags) {
+    cur_flags = *g_flags;
     char user_name[USERNAME_MAX + 1];
     char password[PASSWORD_MAX + 1];
     char pass_confirm[PASSWORD_MAX + 1];
+    char file_name[sizeof(user_name) + sizeof(VAULT_EXT) + 1];
 
-    GetUsername(user_name, sizeof(user_name));
+    GetUsername(user_name, file_name, sizeof(user_name), sizeof(file_name));
     GetPassword(password, sizeof(password));
     GetPasswordConfirm(pass_confirm, sizeof(pass_confirm), password);
-
-    // create a file with .vault extension to store info
-    char file_name[sizeof(user_name) + 7];
-    snprintf(file_name, sizeof(file_name), "%s.vault", user_name);
-
-    FILE *vault = fopen(file_name, "wb");
-    if (!vault) {
-        fprintf(stderr, "Unable to open .vault file, %s\n", strerror(errno));
-        exit(1);
-    }
-    PrintVerboseMessage("Vault file created", g_flags);
 
     unsigned char salt[SALT_SIZE];
     if (RAND_bytes(salt, SALT_SIZE) != 1) {
         fprintf(stderr, "Unable to generate salt, %s\n", ERR_get_error());
         exit(1);
     }
-    PrintVerboseMessage("Salt generated", g_flags);
-
+    PrintVerboseMessage("Salt generated");
 
     struct VaultData v = CreateVaultData(user_name, password, salt);
-    PrintVerboseMessage("Vault data created", g_flags);
+    PrintVerboseMessage("Vault data created");
 
-    if (WriteVaultData(vault, &v) != 1) {
-        fprintf(stderr, "Unable to write into vault file, %s\n", strerror(errno));
+    char *json_str = VaultDataToJson(&v);
+    PrintVerboseMessage("Vault data transformed into JSON");
+
+    FILE *vault = fopen(file_name, "w");
+    if (!vault) {
+        fprintf(stderr, "Unable to open .vault file, %s\n", strerror(errno));
         exit(1);
     }
-    PrintVerboseMessage("Vault data written", g_flags);
+
+    PrintVerboseMessage("Vault file created");
+
+    WriteJsonToFile(vault, json_str);
+    cJSON_free(json_str);
+    fclose(vault);
+    PrintVerboseMessage("Vault data written");
 
     OPENSSL_cleanse(password, sizeof(password));
     OPENSSL_cleanse(pass_confirm, sizeof(pass_confirm));
     OPENSSL_cleanse(&v, sizeof(v));
-    PrintVerboseMessage("Buffers cleansed", g_flags);
-
-    fclose(vault);
+    PrintVerboseMessage("Buffers cleansed");
     printf(GREEN "Successfully signed up!" RESET);
 }

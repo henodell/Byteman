@@ -9,6 +9,16 @@
 #define SALT_SIZE 16
 
 /**
+ * @brief Size of Argon2ID hash to generate
+ */
+#define HASH_SIZE 16
+
+/**
+ * @brief Size of Base64 encoding
+ */
+#define ENCODE_SIZE 25
+
+/**
  * @brief Current version of vault data being used
  */
 extern int cur_version;
@@ -19,12 +29,9 @@ extern int cur_version;
  */
 struct VaultData {
     uint8_t version; /**< Version of the data for future changes*/
-    uint8_t user_len; /**< Length of the username */
-    char user_name[USERNAME_MAX]; /**< Non null-terminated username */
-    unsigned int salt_len; /**< Length of the salt*/
+    char user_name[USERNAME_MAX]; /**< Null-terminated username */
     char salt[SALT_SIZE]; /**< Salt */
-    unsigned int hash_len; /**< Length of the hash */
-    unsigned char hash[SHA256_DIGEST_LENGTH]; /**< Hash */
+    unsigned char hash[HASH_SIZE]; /**< Hash */
 };
 
 /**
@@ -39,15 +46,15 @@ struct Session {
 };
 
 /**
- * @brief Computes a SHA-256 digest of a message with a salt
+ * @brief Derives a key using the Argon2ID
  * 
- * @param msg Pointer to a message (must not be NULL)
- * @param len Length of the message
- * @param digest Char array where the resulting digest will be stored (must be atleast 32)
- * @param digest_len Pointer to an int where the length of the digest will be stored
- * @param salt Char array with salt to be used (must be atleast 16)
- * @param salt_len The length of the salt being used (SALT_SIZE)
+ * @param pwd Password to derive from
+ * @param salt Salt to be used on password
+ * @param result Place to store the result (must be atleast 16 bytes)
  */
-void DigestMessage(const unsigned char *msg, size_t len, unsigned char digest[SHA256_DIGEST_LENGTH], unsigned int *digest_len, char salt[SALT_SIZE], size_t salt_len);
+void DeriveArgon2ID(unsigned char *pw, unsigned char salt[SALT_SIZE], unsigned char result[HASH_SIZE]);
 
-void DeriveKeyPbkdf2(const char *password, const unsigned char salt[SALT_SIZE], unsigned char *key, const unsigned int KEY_LEN);
+/**
+ * @brief 
+ */
+int EncodeBase64(const unsigned char *in, size_t in_len, unsigned char *out, size_t out_len);
