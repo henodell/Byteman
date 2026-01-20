@@ -1,4 +1,5 @@
 #pragma once
+#include "Crypto.h"
 
 /**
  * @defgroup Terminal Colours ANSI colour escape sequences
@@ -11,11 +12,6 @@
 /** @brief ANSI colour escape sequence to reset terminal formatting */
 #define RESET "\033[0m"
 /**@} */
-
-/**
- * @brief Help hint shown after user errors
- */
-#define TRY_BYTEMAN_HELP "try byteman help for more information\n"
 
 /**
  * @enum AppState
@@ -47,22 +43,20 @@ enum AppState GetAppState(void);
 int FileExists(const char *name);
 
 /**
- * @brief Reads input safely
- * 
- * Uses \c fgets() to read input and replaces trailing newline 
- * with a null terminator.
- * 
- * @param buf Buffer to read into (must be atleast BUFFER_SIZE bytes)
- * @param BUFFER_SIZE Size of buffer
- * @return 1 on success 
- * @return 0 on failure (EOF or input error)
- */
-int ReadInput(char *buf, const size_t BUFFER_SIZE);
-
-/**
  * @brief Prints out an info message
  * Prints out an information message with the INFO being blue
  * 
  * @param msg Message to print
+ * @param g_flags Current global flags data
  */
-void PrintInfoMessage(char *msg);
+void PrintVerboseMessage(char *msg, struct GlobalFlags *g_flags);
+
+/**
+ * @brief Conditionally Flushes stdin so fgets doesn't read left over input
+ * 
+ * Checks if there is a newline character in the buffer. If there is a newline character,
+ * it doesn't flush since that means all input was read else it flushes.
+ * 
+ * @param buf The buffer to check for a newline char
+ */
+void FlushStdin(char *buf);

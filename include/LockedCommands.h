@@ -2,29 +2,19 @@
 #include "Cli.h"
 
 /**
- * @defgroup User Limits
- */
-/**@{*/
-
-/**
  * @brief Size limit for usernames
  */
 #define USERNAME_MAX 20
+
 /**
  * @brief Size limits for password
  */
 #define PASSWORD_MAX 64
-/**@} */
 
 /**
  * @brief Vault Extension
  */
 #define VAULT_EXT ".vault"
-
-/**
- * @brief Session management
- */
-#define SESSION_FILE "_byteman.session"
 
 /**
  * @brief Executes the "signup" command

@@ -48,13 +48,21 @@ struct Session {
 /**
  * @brief Derives a key using the Argon2ID
  * 
- * @param pwd Password to derive from
+ * @param pw Password to derive from
  * @param salt Salt to be used on password
  * @param result Place to store the result (must be atleast 16 bytes)
  */
 void DeriveArgon2ID(unsigned char *pw, unsigned char salt[SALT_SIZE], unsigned char result[HASH_SIZE]);
 
 /**
- * @brief 
+ * @brief Encodes value in base 64
+ * 
+ * @param in Pointer to string that will be encoded
+ * @param in_len Size of in
+ * @param out Pointer to a string where the encoded data will be written to
+ * @param out_len Size of out
+ * @return The amount of data written
  */
 int EncodeBase64(const unsigned char *in, size_t in_len, unsigned char *out, size_t out_len);
+
+int DecodeBase64(const unsigned char *in, const size_t in_len, unsigned char *out, const size_t out_len);

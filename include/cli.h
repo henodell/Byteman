@@ -19,7 +19,6 @@ typedef struct {
     char **argv; /**< Array of arguments */
 } CommandArgs;
 
-
 /**
  * @struct CliParams
  * @brief Struct to hold all params to pass around
