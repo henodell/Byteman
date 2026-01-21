@@ -65,20 +65,23 @@ void LoginUsername(char *user, const size_t BUFFER_SIZE, char *file_name, const 
 }
 
 // Login password by comparing hashes
-void LoginPassword(char *pw, const size_t BUFFER_SIZE, FILE *vault) {
+void LoginPassword(char *pw, const size_t BUFFER_SIZE, struct GlobalFlags *g_flags, FILE *vault) {
     cJSON *hash = NULL;
     cJSON *salt = NULL;
     cJSON *root = NULL;
 
     GetHashAndSalt(&hash, &salt, &root, vault);
+    PrintVerboseMessage("Getting hash and salt from vault file", g_flags);
 
     unsigned char d_hash[HASH_SIZE];
     int hash_outl = 0;
     DecodeBase64(d_hash, &hash_outl, hash->valuestring, strlen(hash->valuestring));
+    PrintVerboseMessage("Successfully decoded hash", g_flags);
 
     unsigned char d_salt[SALT_SIZE];
     int salt_outl = 0;
     DecodeBase64(d_salt, &salt_outl, salt->valuestring, strlen(salt->valuestring));
+    PrintVerboseMessage("Successfully decoded salt", g_flags);
 
     while (1) {
         printf("Password: ");
@@ -91,8 +94,10 @@ void LoginPassword(char *pw, const size_t BUFFER_SIZE, FILE *vault) {
         pw[strcspn(pw, "\n")] = 0;
 
         unsigned char result[HASH_SIZE];
-        DeriveArgon2ID(pw, d_salt, result);
+        PrintVerboseMessage("Deriving hash from password with Argon2id", g_flags);
+        DeriveArgon2ID(pw, d_salt, result);        
 
+        PrintVerboseMessage("Comparing hashes.", g_flags);
         if (CRYPTO_memcmp(result, d_hash, sizeof(d_hash)) == 0) {
             break;
         }
@@ -111,12 +116,14 @@ void Login(CommandArgs *args, struct GlobalFlags *g_flags) {
         fprintf(stderr, "Unable to open a vault in mode \'rb\', %s", strerror(errno));
         exit(1);
     }
+    PrintVerboseMessage("Vault opened with mode \'r\'", g_flags);
 
-    LoginPassword(password, sizeof(password), vault);
+    LoginPassword(password, sizeof(password), g_flags, vault);
     fclose(vault);
 
     OPENSSL_cleanse(password, sizeof(password));
     OPENSSL_cleanse(file_name, sizeof(file_name));
+    PrintVerboseMessage("Cleansing buffers", g_flags);
 
     // TODO: Add persistent state and START WORK ON OPEN COMMANDS
     printf(GREEN "Successfully logged in!" RESET);
