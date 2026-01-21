@@ -18,7 +18,7 @@ void EncodeBase64(unsigned char *out, int *outl, const unsigned char *in, int in
 
     EVP_EncodeInit(ctx);
 
-    if (EVP_EncodeUpdate(ctx, out, outl, in, inl) != 1) {
+    if (EVP_EncodeUpdate(ctx, out + *outl, outl, in, inl) != 1) {
         fprintf(stderr, "EVP_EncodeUpdate() failed. Unable to encode data in base64.\n");
         EVP_ENCODE_CTX_free(ctx);
         exit(1);
@@ -40,7 +40,7 @@ void DecodeBase64(unsigned char *out, int *outl, const unsigned char *in, int in
 
     EVP_DecodeInit(ctx);
 
-    if (EVP_DecodeUpdate(ctx, out, outl, in, inl) >= 0) {
+    if (EVP_DecodeUpdate(ctx, out, outl, in, inl) < 0) {
         fprintf(stderr, "EVP_DecodeUpdate() failed. Unable to decode base64 data.\n");
         EVP_ENCODE_CTX_free(ctx);
         exit(1);

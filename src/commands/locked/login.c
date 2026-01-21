@@ -44,7 +44,7 @@ void GetHashAndSalt(cJSON **hash_b64, cJSON **salt_b64, cJSON **root, FILE *vaul
     }
 }
 
-// Gets input for username
+// Login username by checking if a file exists with input
 void LoginUsername(char *user, const size_t BUFFER_SIZE, char *file_name, const size_t FILE_BUF_SIZE) {
     while (1) {
         printf("Username: ");
@@ -64,6 +64,7 @@ void LoginUsername(char *user, const size_t BUFFER_SIZE, char *file_name, const 
     };
 }
 
+// Login password by comparing hashes
 void LoginPassword(char *pw, const size_t BUFFER_SIZE, FILE *vault) {
     cJSON *hash = NULL;
     cJSON *salt = NULL;
@@ -92,7 +93,7 @@ void LoginPassword(char *pw, const size_t BUFFER_SIZE, FILE *vault) {
         unsigned char result[HASH_SIZE];
         DeriveArgon2ID(pw, d_salt, result);
 
-        if ((result, d_hash, sizeof(d_hash)) == 0) {
+        if (CRYPTO_memcmp(result, d_hash, sizeof(d_hash)) == 0) {
             break;
         }
     }
@@ -117,5 +118,6 @@ void Login(CommandArgs *args, struct GlobalFlags *g_flags) {
     OPENSSL_cleanse(password, sizeof(password));
     OPENSSL_cleanse(file_name, sizeof(file_name));
 
+    // TODO: Add persistent state and START WORK ON OPEN COMMANDS
     printf(GREEN "Successfully logged in!" RESET);
 }
