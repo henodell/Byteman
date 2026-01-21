@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+
 #include "Cli.h"
 #include "Utils.h"
 
@@ -18,7 +19,6 @@ const struct option long_options[] = {
 
 // Parses all global flags
 void ParseGlobalFlags(int argc, char **argv) {
-
     int long_index; 
     int opt;
 
@@ -51,7 +51,7 @@ void ToLowerCase(char *s) {
 // Public API //
 
 void ParseArgs(int argc, char **argv) {
-    // Bounds check
+    // Initial bounds check
     if (argc < 2) {
         fprintf(stderr, "expected atleast 2 args with a command, got %i args\n", argc);
         exit(1);

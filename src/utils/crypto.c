@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include <string.h>
 #include <openssl/evp.h>
 #include <openssl/core_names.h>
 #include <openssl/params.h>
 #include <openssl/thread.h>
 #include <openssl/kdf.h>
-#include <string.h>
+
 #include "Crypto.h"
 
 // Public API
