@@ -1,126 +1,121 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/sha.h>
-#include <openssl/err.h>
-#include <openssl/rand.h>
-#include <openssl/crypto.h>
 #include <errno.h>
+#include <openssl/crypto.h>
+#include <cJSON.h>
+
 #include "Utils.h"
 #include "LockedCommands.h"
 #include "Crypto.h"
 
-
 // Shell //
 
-// Gets input for username and opens a vault with rb
-char *LoginUsername(char *buf, const size_t BUFFER_SIZE) {
+// Get hash and salt from a vault file
+void GetHashAndSalt(cJSON **hash_b64, cJSON **salt_b64, cJSON **root, FILE *vault) {
+    // Read file into a string
+    char buffer[1024];
+    int len = fread(buffer, 1, sizeof(buffer), vault);
+    if (len == 0) {
+        fprintf(stderr, "Unable to fread file, ", strerror(errno));
+        exit(1);
+    }
+    rewind(vault);
+
+    buffer[len] = 0;
+
+    cJSON *json = cJSON_Parse(buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            fprintf(stderr, "Unable to parse JSON data, ", error_ptr);
+        }
+        cJSON_Delete(json);
+        exit(1);
+    }
+
+    *root = json;
+    *hash_b64 = cJSON_GetObjectItemCaseSensitive(json, "hash");
+    *salt_b64 = cJSON_GetObjectItemCaseSensitive(json, "salt");
     
+    if (!*hash_b64|| !*salt_b64) {
+        fprintf(stderr, "Vault missing salt or hash.\n");
+        exit(1);
+    }
+}
+
+// Gets input for username
+void LoginUsername(char *user, const size_t BUFFER_SIZE, char *file_name, const size_t FILE_BUF_SIZE) {
     while (1) {
         printf("Username: ");
-        if (ReadInput(buf, BUFFER_SIZE) != 1) {
+        if (fgets(user, BUFFER_SIZE, stdin) == NULL) {
             fprintf(stderr, "\nUnable to read input due to possible input error or EOF.\n");
             exit(1);
         }
-        char file_name[USERNAME_MAX + sizeof(VAULT_EXT) + 1];
-        snprintf(file_name, sizeof(file_name), "%s%s", buf, VAULT_EXT);
+
+        FlushStdin(user);
+        user[strcspn(user, "\n")] = 0;
+
+        snprintf(file_name, FILE_BUF_SIZE, "%s%s", user, VAULT_EXT);
 
         if (FileExists(file_name)) {
-            char *name = strdup(file_name);
-            if (!name) {
-                fprintf(stderr, "strdup failed: %s", strerror(errno));
-                exit(1);
-            }
-            return name;
+            break;
+        }
+    };
+}
+
+void LoginPassword(char *pw, const size_t BUFFER_SIZE, FILE *vault) {
+    cJSON *hash = NULL;
+    cJSON *salt = NULL;
+    cJSON *root = NULL;
+
+    GetHashAndSalt(&hash, &salt, &root, vault);
+
+    unsigned char d_hash[HASH_SIZE];
+    int hash_outl = 0;
+    DecodeBase64(d_hash, &hash_outl, hash->valuestring, strlen(hash->valuestring));
+
+    unsigned char d_salt[SALT_SIZE];
+    int salt_outl = 0;
+    DecodeBase64(d_salt, &salt_outl, salt->valuestring, strlen(salt->valuestring));
+
+    while (1) {
+        printf("Password: ");
+        if (fgets(pw, BUFFER_SIZE, stdin) == NULL) {
+            fprintf(stderr, "\nUnable to read input due to input error or EOF.\n");
+            exit(1);
+        }
+
+        FlushStdin(pw);
+        pw[strcspn(pw, "\n")] = 0;
+
+        unsigned char result[HASH_SIZE];
+        DeriveArgon2ID(pw, d_salt, result);
+
+        if ((result, d_hash, sizeof(d_hash)) == 0) {
+            break;
         }
     }
 }
 
-// Gets the vault data and returns the struct filled with it
-struct VaultData GetVaultData(FILE *vault) {
-    struct VaultData v = {0};
-    
-    // verify file size
-    fseek(vault, 0, SEEK_END);
-    long size = ftell(vault);
-    rewind(vault);
-
-    if (size != sizeof(struct VaultData)) {
-        fprintf(stderr, "Invalid file size, make sure you sign up and login on the same version of byteman.\n");
-        exit(1);
-    }
-
-    if (fread(&v, sizeof(v), 1, vault) != 1) {
-        fprintf(stderr, "Unable to read from vault file, %s", strerror(errno));
-        exit(1);
-    }
-
-    return v;
-}   
-
-// Get input for password and verify against password
-void LoginPassword(char *buf, const size_t BUFFER_SIZE, FILE *vault) {
-    struct VaultData v = GetVaultData(vault);
-
-    if (v.version != cur_version) {
-        fprintf(stderr, "Version of data does not match." 
-            "Ensure you used the same version of byteman for both signup and login");
-        exit(1);
-    }
-    
-    while (1) {
-        printf("Password: ");
-
-        if (ReadInput(buf, BUFFER_SIZE) != 1) {
-            fprintf(stderr, "\nUnable to read input due to possible input error or EOF.\n");
-            exit(1);
-        }
-
-        unsigned char digest[SHA256_DIGEST_LENGTH];
-        unsigned int digest_len = 0;
-
-        DigestMessage(buf, strlen(buf), digest, &digest_len, v.salt, v.salt_len);
-
-        if (digest_len == v.hash_len && CRYPTO_memcmp(digest, v.hash, v.hash_len) == 0) {
-            OPENSSL_cleanse(buf, strlen(buf));
-            OPENSSL_cleanse(digest, digest_len);
-            OPENSSL_cleanse(&v, sizeof(v));
-            break;
-        }
-    }
-} 
-
+// Handler
 void Login(CommandArgs *args, struct GlobalFlags *g_flags) {
     char user_name[USERNAME_MAX + 1];
     char password[PASSWORD_MAX + 1];
-    FILE *vault = NULL;
+    char file_name[USERNAME_MAX + sizeof(VAULT_EXT) + 1];
 
-    char *file_name = LoginUsername(user_name, sizeof(user_name));
-    vault = fopen(file_name, "rb");
+    LoginUsername(user_name, sizeof(user_name), file_name, sizeof(file_name));
+    FILE *vault = fopen(file_name, "r");
     if (!vault) {
         fprintf(stderr, "Unable to open a vault in mode \'rb\', %s", strerror(errno));
         exit(1);
     }
 
-    free(file_name);
-
     LoginPassword(password, sizeof(password), vault);
     fclose(vault);
 
-    FILE *session = fopen("_byteman.session", "wb");
-
-    unsigned char *salt;
-    if (RAND_bytes(salt, SALT_SIZE) != 1) {
-        fprintf(stderr, "Unable to generate salt, %s\n", ERR_get_error());
-        exit(1);
-    }
-
-    unsigned char *key;
-    DeriveKeyPbkdf2(password, salt, key, SHA256_DIGEST_LENGTH);
-    struct Session ses = {user_name, key, salt, time(NULL)};
-
-    fwrite(&ses, sizeof(ses), 1, session);
-    fclose(session);
+    OPENSSL_cleanse(password, sizeof(password));
+    OPENSSL_cleanse(file_name, sizeof(file_name));
 
     printf(GREEN "Successfully logged in!" RESET);
 }
