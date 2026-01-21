@@ -9,14 +9,52 @@
 
 // Public API
 
-int EncodeBase64(const unsigned char *in, size_t in_len, unsigned char *out, size_t out_len) {
-    int written = EVP_EncodeBlock(out, in, in_len);
-    if (written < 0 || (size_t) written >= out_len) {
-        return 0;
+void EncodeBase64(unsigned char *out, int *outl, const unsigned char *in, int inl) {
+    EVP_ENCODE_CTX *ctx = EVP_ENCODE_CTX_new();
+    if (!ctx) {
+        fprintf(stderr, "EVP_ENCODE_CTX_new() failed. Unable to encode data in base64.\n");
+        exit(1);
     }
 
-    out[written] = 0;
-    return written;
+    EVP_EncodeInit(ctx);
+
+    if (EVP_EncodeUpdate(ctx, out, outl, in, inl) != 1) {
+        fprintf(stderr, "EVP_EncodeUpdate() failed. Unable to encode data in base64.\n");
+        EVP_ENCODE_CTX_free(ctx);
+        exit(1);
+    }
+
+    int final_len = 0;
+    EVP_EncodeFinal(ctx, out, &final_len);
+    *outl += final_len;
+
+    EVP_ENCODE_CTX_free(ctx);
+}
+
+void DecodeBase64(unsigned char *out, int *outl, const unsigned char *in, int inl) {
+    EVP_ENCODE_CTX *ctx = EVP_ENCODE_CTX_new();
+    if (!ctx) {
+        fprintf(stderr, "EVP_ENCODE_CTX_new() failed. Unable to encode data in base64.\n");
+        exit(1);
+    }
+
+    EVP_DecodeInit(ctx);
+
+    if (EVP_DecodeUpdate(ctx, out, outl, in, inl) >= 0) {
+        fprintf(stderr, "EVP_DecodeUpdate() failed. Unable to decode base64 data.\n");
+        EVP_ENCODE_CTX_free(ctx);
+        exit(1);
+    }
+
+    int final_len = 0;
+    if (EVP_DecodeFinal(ctx, out, &final_len) != 1) {
+        fprintf(stderr, "EVP_DecodeFinal() failed. Unable to decode base64 data.\n");
+        EVP_ENCODE_CTX_free(ctx);
+        exit(1);
+    }
+
+    *outl += final_len;
+    EVP_ENCODE_CTX_free(ctx);
 }
 
 void DeriveArgon2ID(unsigned char *pw, unsigned char salt[SALT_SIZE], unsigned char result[HASH_SIZE]) {

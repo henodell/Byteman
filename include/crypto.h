@@ -1,6 +1,5 @@
 #pragma once
-#include <openssl/sha.h>
-#include <time.h>
+#include <stdint.h>
 #include "LockedCommands.h"
 
 /**
@@ -35,17 +34,6 @@ struct VaultData {
 };
 
 /**
- * @struct Session
- * @brief Data to store for each session
- */
-struct Session {
-    char *user_name; /**< Null-terminated username*/
-    unsigned char *key; /**< Key derived from master password */
-    unsigned char *salt;
-    time_t time_stamp; /**< Timestamp for expiration */
-};
-
-/**
  * @brief Derives a key using the Argon2ID
  * 
  * @param pw Password to derive from
@@ -57,12 +45,19 @@ void DeriveArgon2ID(unsigned char *pw, unsigned char salt[SALT_SIZE], unsigned c
 /**
  * @brief Encodes value in base 64
  * 
- * @param in Pointer to string that will be encoded
- * @param in_len Size of in
- * @param out Pointer to a string where the encoded data will be written to
- * @param out_len Size of out
- * @return The amount of data written
+ * @param out Pointer to a string to store the encoded data (unsigned char)
+ * @param outl Pointer to an integer to store the encoded data length
+ * @param in Pointer to a string of the data to encode
+ * @param inl Integer holding amount of data to encode
  */
-int EncodeBase64(const unsigned char *in, size_t in_len, unsigned char *out, size_t out_len);
+void EncodeBase64(unsigned char *out, int *outl, const unsigned char *in, int inl);
 
-int DecodeBase64(const unsigned char *in, const size_t in_len, unsigned char *out, const size_t out_len);
+/**
+ * @brief Decodes base64
+ * 
+ * @param out Pointer to a string to store the decoded data length
+ * @param outl Pointer to an integer to store to the decoded data length
+ * @param in Pointer to a string of the base64 data to decode
+ * @param inl Integer holding the amount of base64 data to decode
+ */
+void DecodeBase64(unsigned char *out, int *outl, const unsigned char *in, int inl);

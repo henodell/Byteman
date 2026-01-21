@@ -21,6 +21,15 @@ int FileExists(const char *name) {
     return 0;
 }
 
-void PrintInfoMessage(char *msg) {
-    printf("[INFO] %s\n", msg);
+void PrintVerboseMessage(char *msg, struct GlobalFlags *g_flags) {
+    if (g_flags->verbose) {
+        printf("[INFO] ""%s\n", msg);
+    }
+}
+
+void FlushStdin(char *buf) {
+    if (!strchr(buf, '\n')) {
+        int c;
+        while ((c = getchar()) != EOF && c != '\n');
+    }
 }
