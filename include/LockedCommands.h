@@ -2,7 +2,7 @@
 #include "Cli.h"
 
 /**
- * @brief Size limit for usernames
+ * @brief Size limit for username
  */
 #define USERNAME_MAX 20
 
@@ -17,13 +17,11 @@
 #define VAULT_EXT ".vault"
 
 /**
+ * REWRITE NEEDED
  * @brief Executes the "signup" command
  * 
- * Asks the user to create a new account. Validates the input and 
- * stores the info securely in a .vault file. Prints errors on failure. 
- * 
  * @param args - Struct containing argc and argv
- * @param g_flags - Struct containing global flags such as --verbose
+ * @param g_flags - Struct containing global flags
  */
 void Signup(CommandArgs *args, struct GlobalFlags *g_flags);
 

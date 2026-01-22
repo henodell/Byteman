@@ -1,17 +1,11 @@
 #pragma once
 #include "Crypto.h"
 
-/**
- * @defgroup Terminal Colours ANSI colour escape sequences
- */
-/**@{ */
-
 /** @brief ANSI colour escape sequence for green */
 #define GREEN "\033[32m"
 
 /** @brief ANSI colour escape sequence to reset terminal formatting */
 #define RESET "\033[0m"
-/**@} */
 
 /**
  * @enum AppState
@@ -23,6 +17,7 @@ enum AppState {
 };
 
 /**
+ * REWRITE NEEDED
  * @brief Gets the current AppState
  * 
  * Determines whether the user is authenticated or not by
@@ -44,19 +39,20 @@ int FileExists(const char *name);
 
 /**
  * @brief Prints out an info message
- * Prints out an information message with the INFO being blue
+ * 
+ * Prints out an information message for the --verbose flag
  * 
  * @param msg Message to print
- * @param g_flags Current global flags data
+ * @param g_flags Current global flags
  */
 void PrintVerboseMessage(char *msg, struct GlobalFlags *g_flags);
 
 /**
- * @brief Conditionally Flushes stdin so fgets doesn't read left over input
+ * @brief Conditionally flushes stdin
  * 
  * Checks if there is a newline character in the buffer. If there is a newline character,
  * it doesn't flush since that means all input was read else it flushes.
  * 
- * @param buf The buffer to check for a newline char
+ * @param buf Buffer to check for a newline char
  */
 void FlushStdin(char *buf);
