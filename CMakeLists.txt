@@ -7,7 +7,7 @@ set(LOCKED_COMMANDS_DIR "src/commands/locked")
 set(OPEN_COMMANDS_DIR "src/commands/open")
 set(CLI_DIR "src/cli")
 set(UTILS_DIR "src/utils")
-set(DEPS_DIR ${CMAKE_SOURCE_DIR}/deps)
+set(DEPS_DIR ${PROJECT_SOURCE_DIR}/deps)
 
 # Packages
 find_package(OpenSSL REQUIRED)
@@ -31,19 +31,18 @@ else (DOXYGEN_FOUND)
     message("Doxygen needs to be installed")
 endif (DOXYGEN_FOUND)
 
-# Deps
-add_library(cJson INTERFACE ${DEPS_DIR}/cjson)
-target_include_directories(cJson INTERFACE ${DEPS_DIR}/cjson)
+# cjson
+add_library(cJSON STATIC ${DEPS_DIR}/cjson/cJSON.c)
+target_include_directories(cJSON PUBLIC ${DEPS_DIR}/cjson/)
 
 # Open Commands
 add_library(open_commands STATIC ${OPEN_COMMANDS_DIR}/Get.c)
-target_include_directories(open_commands PUBLIC include)
-target_link_libraries(open_commands PRIVATE OpenSSL::Crypto)
+target_include_directories(open_commands PUBLIC include) 
 
 # Locked Commands
 add_library(locked_commands STATIC ${LOCKED_COMMANDS_DIR}/Login.c ${LOCKED_COMMANDS_DIR}/Signup.c)
 target_include_directories(locked_commands PUBLIC include)
-target_link_libraries(locked_commands PRIVATE OpenSSL::Crypto cJson)
+target_link_libraries(locked_commands PRIVATE OpenSSL::Crypto cJSON)
 
 # ClI parsing
 add_library(cli STATIC ${CLI_DIR}/CliParse.c ${CLI_DIR}/CommandDispatch.c)
@@ -52,6 +51,4 @@ target_link_libraries(cli PUBLIC locked_commands open_commands)
 
 # main exe
 add_executable(Byteman src/Main.c ${UTILS_DIR}/Crypto.c ${UTILS_DIR}/Utils.c)
-target_link_libraries(Byteman PUBLIC locked_commands)
-target_link_libraries(Byteman PUBLIC open_commands)
-target_link_libraries(Byteman PUBLIC cli)
+target_link_libraries(Byteman PUBLIC locked_commands open_commands cli)
